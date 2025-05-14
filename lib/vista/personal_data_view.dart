@@ -1,0 +1,189 @@
+import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+
+class PersonalDataView extends StatefulWidget {
+  const PersonalDataView({super.key});
+
+  @override
+  State<PersonalDataView> createState() => _PersonalDataView();
+}
+
+class _PersonalDataView extends State<PersonalDataView> {
+  final _formKey = GlobalKey<FormState>();
+  final TextEditingController _namesController = TextEditingController();
+  final TextEditingController _dateController = TextEditingController();
+  final TextEditingController _emailController = TextEditingController();
+
+  String? _selectedGender;
+  final List<String> _genders = [
+    'Masculino',
+    'Femenino',
+    'No binario',
+    'Prefiero no decirlo',
+    'Otro'
+  ];
+
+  Future<void> _selectDate(BuildContext context) async {
+    final DateTime? picked = await showDatePicker(
+      context: context,
+      initialDate: DateTime(2000),
+      firstDate: DateTime(1900),
+      lastDate: DateTime.now(),
+      helpText: 'Selecciona tu fecha de nacimiento',
+      locale: const Locale("es", "ES"),
+    );
+    if (picked != null) {
+      setState(() {
+        _dateController.text = DateFormat('yyyy-MM-dd').format(picked);
+      });
+    }
+  }
+
+  void _onSubmit() {
+    if (_formKey.currentState?.validate() != true) return;
+
+    final name = _namesController.text.trim();
+    final birthdate = _dateController.text.trim();
+    final gender = _selectedGender;
+    final email = _emailController.text.trim();
+
+    if (gender == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Por favor, selecciona un género')),
+      );
+      return;
+    }
+
+    print('Datos ingresados:');
+    print('Nombre: $name');
+    print('Fecha de nacimiento: $birthdate');
+    print('Género: $gender');
+    print('Email: $email');
+
+    // Aquí va la lógica para guardar en base de datos o continuar
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    _emailController.text = FirebaseAuth.instance.currentUser?.email ?? '';
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: const Color(0xFFE0FFFF),
+      body: Form(
+        key: _formKey,
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.all(24.0),
+          child: Column(
+            children: [
+              const Text(
+                '¡Hola!',
+                style: TextStyle(
+                    fontSize: 28,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.pinkAccent),
+              ),
+              const SizedBox(height: 16),
+              const Text(
+                'Complete su perfil para obtener una mejor experiencia personalizada',
+                style: TextStyle(fontSize: 16),
+              ),
+              const SizedBox(height: 32),
+              TextFormField(
+                controller: _namesController,
+                decoration: const InputDecoration(
+                  labelText: 'Nombre completo',
+                  prefixIcon: Icon(Icons.person),
+                  border: OutlineInputBorder(),
+                ),
+                validator: (value) {
+                  if (value == null || value.trim().isEmpty) {
+                    return 'Ingresa tu nombre completo';
+                  }
+                  return null;
+                },
+              ),
+              const SizedBox(height: 16),
+              TextFormField(
+                controller: _dateController,
+                readOnly: true,
+                onTap: () => _selectDate(context),
+                decoration: const InputDecoration(
+                  labelText: 'Fecha de nacimiento',
+                  prefixIcon: Icon(Icons.calendar_today),
+                  border: OutlineInputBorder(),
+                ),
+                validator: (value) {
+                  if (value == null || value.trim().isEmpty) {
+                    return 'Selecciona tu fecha de nacimiento';
+                  }
+                  return null;
+                },
+              ),
+              const SizedBox(height: 16),
+              DropdownButtonFormField<String>(
+                value: _selectedGender,
+                onChanged: (value) {
+                  setState(() {
+                    _selectedGender = value;
+                  });
+                },
+                items: _genders
+                    .map((gender) => DropdownMenuItem(
+                          value: gender,
+                          child: Text(gender),
+                        ))
+                    .toList(),
+                decoration: const InputDecoration(
+                  labelText: 'Género',
+                  prefixIcon: Icon(Icons.wc),
+                  border: OutlineInputBorder(),
+                ),
+              ),
+              const SizedBox(height: 16),
+              TextFormField(
+                controller: _emailController,
+                readOnly: true,
+                decoration: const InputDecoration(
+                  labelText: 'Correo electrónico',
+                  prefixIcon: Icon(Icons.email),
+                  border: OutlineInputBorder(),
+                ),
+                validator: (value) {
+                  if (value == null || value.trim().isEmpty) {
+                    return 'Correo no disponible';
+                  }
+                  return null;
+                },
+              ),
+              const SizedBox(height: 80), // Espacio para botón fijo
+            ],
+          ),
+        ),
+      ),
+      bottomNavigationBar: Padding(
+        padding: const EdgeInsets.all(24.0),
+        child: SizedBox(
+          height: 48,
+          child: ElevatedButton(
+            onPressed: _onSubmit,
+            style: ElevatedButton.styleFrom(
+              backgroundColor: const Color(0xFF2E004F),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
+            ),
+            child: const Text(
+              'Continuar',
+              style: TextStyle(fontSize: 16, color: Colors.white),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}

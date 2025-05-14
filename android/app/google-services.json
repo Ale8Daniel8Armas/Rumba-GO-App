@@ -1,0 +1,47 @@
+{
+  "project_info": {
+    "project_number": "136907631392",
+    "project_id": "fire-rumba-go",
+    "storage_bucket": "fire-rumba-go.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:136907631392:android:ea9e48ecda85dbb7b34545",
+        "android_client_info": {
+          "package_name": "com.example.rumba_go_app"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "136907631392-uou1vdj38a7a1iv2ap3e0nb28nphm9e0.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.rumba_go_app",
+            "certificate_hash": "f94d01d587ce0fe9fe3e3897431b870953abe6c0"
+          }
+        },
+        {
+          "client_id": "136907631392-scoanrs512qeqfo8iabj83jh6jodjhpm.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDEqU1usv8luaykJ-UP2drFB8RWeJAjIII"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "136907631392-scoanrs512qeqfo8iabj83jh6jodjhpm.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
