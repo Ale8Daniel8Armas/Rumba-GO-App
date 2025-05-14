@@ -25,18 +25,64 @@ class _PersonalDataView extends State<PersonalDataView> {
   ];
 
   Future<void> _selectDate(BuildContext context) async {
-    final DateTime? picked = await showDatePicker(
-      context: context,
-      initialDate: DateTime(2000),
-      firstDate: DateTime(1900),
-      lastDate: DateTime.now(),
-      helpText: 'Selecciona tu fecha de nacimiento',
-      locale: const Locale("es", "ES"),
-    );
-    if (picked != null) {
-      setState(() {
-        _dateController.text = DateFormat('yyyy-MM-dd').format(picked);
-      });
+    try {
+      final DateTime? picked = await showDatePicker(
+        context: context,
+        initialDate: DateTime(2000),
+        firstDate: DateTime(1900),
+        lastDate: DateTime.now(),
+        helpText: 'Selecciona tu fecha de nacimiento',
+        locale: const Locale("es", "ES"),
+      );
+
+      if (picked != null) {
+        setState(() {
+          _dateController.text = DateFormat('yyyy-MM-dd').format(picked);
+        });
+      }
+    } catch (e) {
+      final manualController = TextEditingController();
+      await showDialog(
+        context: context,
+        builder: (context) => AlertDialog(
+          title: const Text('Ingresa tu fecha de nacimiento'),
+          content: TextField(
+            controller: manualController,
+            decoration: const InputDecoration(
+              hintText: 'Formato: yyyy-MM-dd',
+              labelText: 'Fecha de nacimiento',
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.pop(context);
+              },
+              child: const Text('Cancelar'),
+            ),
+            ElevatedButton(
+              onPressed: () {
+                final input = manualController.text.trim();
+                try {
+                  final parsedDate =
+                      DateFormat('yyyy-MM-dd').parseStrict(input);
+                  setState(() {
+                    _dateController.text =
+                        DateFormat('yyyy-MM-dd').format(parsedDate);
+                  });
+                  Navigator.pop(context);
+                } catch (e) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                        content: Text('Formato inválido. Usa yyyy-MM-dd')),
+                  );
+                }
+              },
+              child: const Text('Aceptar'),
+            ),
+          ],
+        ),
+      );
     }
   }
 
