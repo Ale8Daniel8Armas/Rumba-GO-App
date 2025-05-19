@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'intereses_view.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 class PersonalDataView extends StatefulWidget {
   const PersonalDataView({super.key});
@@ -108,7 +109,17 @@ class _PersonalDataView extends State<PersonalDataView> {
     print('Género: $gender');
     print('Email: $email');
 
-    // Aquí va la lógica para guardar en base de datos o continuar
+    //Lógica para guardar en base de datos o continuar
+
+    CollectionReference collRef =
+        FirebaseFirestore.instance.collection('cliente');
+
+    collRef.add({
+      'name': _namesController,
+      'date': _dateController,
+      'gender': _selectedGender,
+      'email': _emailController,
+    });
 
     //Este es el boton para ir a la siguiente ruta
     Navigator.pushReplacement(

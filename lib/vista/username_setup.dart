@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'personal_data_view.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 class UsernameSetupView extends StatefulWidget {
   const UsernameSetupView({super.key});
@@ -21,6 +22,13 @@ class _UsernameSetupViewState extends State<UsernameSetupView> {
       );
       return;
     }
+
+    CollectionReference collRef =
+        FirebaseFirestore.instance.collection('cliente');
+
+    collRef.add({
+      'user_name': _usernameController,
+    });
 
     print('Nombre de usuario confirmado: $username');
 
