@@ -30,7 +30,7 @@ class PerfilView extends StatelessWidget {
             ),
             const SizedBox(height: 10),
             const Text(
-              '@SebasRiv29013',
+              '@nombre_usuario',
               style: TextStyle(
                 color: Colors.blue,
                 fontWeight: FontWeight.w600,
