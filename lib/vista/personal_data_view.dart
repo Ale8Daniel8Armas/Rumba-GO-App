@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'intereses_view.dart';
 
 class PersonalDataView extends StatefulWidget {
   const PersonalDataView({super.key});
@@ -108,6 +109,14 @@ class _PersonalDataView extends State<PersonalDataView> {
     print('Email: $email');
 
     // Aquí va la lógica para guardar en base de datos o continuar
+
+    //Este es el boton para ir a la siguiente ruta
+    Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(
+        builder: (context) => const InteresesView(),
+      ),
+    );
   }
 
   @override
@@ -206,7 +215,7 @@ class _PersonalDataView extends State<PersonalDataView> {
                   return null;
                 },
               ),
-              const SizedBox(height: 80), // Espacio para botón fijo
+              const SizedBox(height: 80),
             ],
           ),
         ),
