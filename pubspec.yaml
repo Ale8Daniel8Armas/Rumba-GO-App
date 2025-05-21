@@ -21,8 +21,15 @@ dependencies:
     sdk: flutter
 
 dev_dependencies:
+  integration_test:
+    sdk: flutter
   flutter_test:
     sdk: flutter
+  firebase_auth_mocks: ^0.13.0
+  firebase_core: any
+  firebase_auth: any
+  mockito: ^5.4.2
+  build_runner: ^2.4.6
 
   flutter_lints: ^5.0.0
   font_awesome_flutter: ^10.7.0
