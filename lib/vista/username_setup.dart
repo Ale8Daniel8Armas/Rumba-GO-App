@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'personal_data_view.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 class UsernameSetupView extends StatefulWidget {
@@ -23,12 +24,14 @@ class _UsernameSetupViewState extends State<UsernameSetupView> {
       return;
     }
 
+    final uid = FirebaseAuth.instance.currentUser!.uid;
+
     CollectionReference collRef =
         FirebaseFirestore.instance.collection('cliente');
 
-    collRef.add({
-      'user_name': _usernameController,
-    });
+    collRef.doc(uid).set({
+      'user_name': _usernameController.text.trim(),
+    }, SetOptions(merge: true));
 
     print('Nombre de usuario confirmado: $username');
 

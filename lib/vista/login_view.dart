@@ -1,7 +1,9 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:flutter/material.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'username_setup.dart';
+import 'profile_view.dart';
 
 class LoginView extends StatefulWidget {
   const LoginView({super.key});
@@ -13,19 +15,13 @@ class LoginView extends StatefulWidget {
 class _LoginViewState extends State<LoginView> {
   Future<void> _signInWithGoogle() async {
     try {
-      // Inicializa GoogleSignIn con el clientId para Web
       final googleSignIn = GoogleSignIn(
         clientId:
             '136907631392-scoanrs512qeqfo8iabj83jh6jodjhpm.apps.googleusercontent.com',
       );
 
-      // Sign in con Google
       final GoogleSignInAccount? googleUser = await googleSignIn.signIn();
-
-      if (googleUser == null) {
-        // Cancelado por el usuario
-        return;
-      }
+      if (googleUser == null) return;
 
       final GoogleSignInAuthentication googleAuth =
           await googleUser.authentication;
@@ -40,16 +36,29 @@ class _LoginViewState extends State<LoginView> {
       final user = FirebaseAuth.instance.currentUser;
       print('Usuario autenticado: ${user?.displayName}, ${user?.email}');
 
-      if (user != null) {
+      if (user == null) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('No se pudo autenticar al usuario.')),
+        );
+        return;
+      }
+
+      final userDoc = await FirebaseFirestore.instance
+          .collection('cliente')
+          .doc(user.uid)
+          .get();
+
+      if (userDoc.exists) {
         Navigator.pushReplacement(
           context,
           MaterialPageRoute(
-            builder: (context) => const UsernameSetupView(),
+            builder: (context) => const PerfilView(),
           ),
         );
       } else {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('No se pudo autenticar al usuario.')),
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (context) => const UsernameSetupView()),
         );
       }
     } catch (e) {

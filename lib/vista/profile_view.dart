@@ -1,8 +1,37 @@
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'edit_profile_view.dart';
+import 'package:google_sign_in/google_sign_in.dart';
+import 'login_view.dart';
 
-class PerfilView extends StatelessWidget {
+class PerfilView extends StatefulWidget {
   const PerfilView({super.key});
+
+  @override
+  State<PerfilView> createState() => _PerfilViewState();
+}
+
+class _PerfilViewState extends State<PerfilView> {
+  String _username = '';
+
+  @override
+  void initState() {
+    super.initState();
+    _loadUsername();
+  }
+
+  Future<void> _loadUsername() async {
+    final uid = FirebaseAuth.instance.currentUser?.uid;
+    if (uid == null) return;
+
+    final doc =
+        await FirebaseFirestore.instance.collection('cliente').doc(uid).get();
+    setState(() {
+      _username = doc.data()?['user_name'] ?? 'Usuario';
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -29,8 +58,8 @@ class PerfilView extends StatelessWidget {
                   size: 40, color: Colors.black54),
             ),
             const SizedBox(height: 10),
-            const Text(
-              '@nombre_usuario',
+            Text(
+              '@$_username',
               style: TextStyle(
                 color: Colors.blue,
                 fontWeight: FontWeight.w600,
@@ -38,7 +67,7 @@ class PerfilView extends StatelessWidget {
             ),
             const SizedBox(height: 5),
             const Text(
-              'Soy una persona muy extrovertida',
+              'Sin descripción',
               style: TextStyle(color: Colors.black87),
             ),
             const SizedBox(height: 15),
@@ -53,11 +82,24 @@ class PerfilView extends StatelessWidget {
               ],
             ),
             const SizedBox(height: 30),
+            /* _ListTileProfile(
+              icon: Icons.edit,
+              text: 'Agregar Redes Sociales',
+              color: Colors.blue,
+              onTap: () {},
+            ), */
             _ListTileProfile(
               icon: Icons.edit,
               text: 'Editar',
               color: Colors.blue,
-              onTap: () {},
+              onTap: () {
+                Navigator.pushReplacement(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => const PerfilEditableView(),
+                  ),
+                );
+              },
             ),
             _ListTileProfile(
               icon: Icons.star,
@@ -69,7 +111,18 @@ class PerfilView extends StatelessWidget {
               icon: Icons.logout,
               text: 'Salir',
               color: Colors.red,
-              onTap: () {},
+              onTap: () async {
+                await GoogleSignIn().signOut();
+                await FirebaseAuth.instance.signOut();
+
+                if (context.mounted) {
+                  Navigator.pushAndRemoveUntil(
+                    context,
+                    MaterialPageRoute(builder: (context) => const LoginView()),
+                    (route) => false,
+                  );
+                }
+              },
             ),
           ],
         ),

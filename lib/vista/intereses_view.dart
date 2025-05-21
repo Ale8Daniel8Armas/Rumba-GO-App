@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'profile_view.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 class InteresesView extends StatefulWidget {
   const InteresesView({super.key});
@@ -77,7 +79,6 @@ class _InteresesViewState extends State<InteresesView> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Flecha de retroceso
             Padding(
               padding: const EdgeInsets.only(left: 16, top: 8),
               child: IconButton(
@@ -85,7 +86,6 @@ class _InteresesViewState extends State<InteresesView> {
                 onPressed: () => Navigator.of(context).pop(),
               ),
             ),
-
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 24.0),
               child: Column(
@@ -108,34 +108,27 @@ class _InteresesViewState extends State<InteresesView> {
                 ],
               ),
             ),
-
             _buildCategorySection(
               icon: Icons.music_note,
               title: 'Tipo de música',
               category: 'music',
               options: _musicOptions,
             ),
-
             const SizedBox(height: 16),
-
             _buildCategorySection(
               icon: Icons.apartment,
               title: 'Tipo de ambiente',
               category: 'ambience',
               options: _ambienceOptions,
             ),
-
             const SizedBox(height: 16),
-
             _buildCategorySection(
               icon: Icons.local_drink,
               title: 'Bebidas y consumo',
               category: 'drinks',
               options: _drinksOptions,
             ),
-
             const Spacer(),
-
             Padding(
               padding: const EdgeInsets.all(24.0),
               child: Column(
@@ -164,15 +157,36 @@ class _InteresesViewState extends State<InteresesView> {
                     height: 48,
                     child: ElevatedButton(
                       onPressed: _selectedInterests.length >= _minSelections
-                          ? () {
-                              Navigator.pushReplacement(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (context) => const PerfilView(),
-                                ),
-                              );
-                              print(
-                                  'Intereses seleccionados: $_selectedInterests');
+                          ? () async {
+                              final uid =
+                                  FirebaseAuth.instance.currentUser?.uid;
+                              if (uid == null) return;
+
+                              try {
+                                await FirebaseFirestore.instance
+                                    .collection('cliente')
+                                    .doc(uid)
+                                    .set({
+                                  'interests': _selectedInterests,
+                                }, SetOptions(merge: true));
+
+                                print(
+                                    'Intereses guardados: $_selectedInterests');
+
+                                Navigator.pushReplacement(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) => const PerfilView(),
+                                  ),
+                                );
+                              } catch (e) {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  const SnackBar(
+                                      content: Text(
+                                          'Error al guardar los intereses')),
+                                );
+                                print('Error guardando intereses: $e');
+                              }
                             }
                           : null,
                       style: ElevatedButton.styleFrom(

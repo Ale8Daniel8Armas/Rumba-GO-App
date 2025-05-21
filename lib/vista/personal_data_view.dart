@@ -109,17 +109,17 @@ class _PersonalDataView extends State<PersonalDataView> {
     print('Género: $gender');
     print('Email: $email');
 
-    //Lógica para guardar en base de datos o continuar
+    final uid = FirebaseAuth.instance.currentUser!.uid;
 
     CollectionReference collRef =
         FirebaseFirestore.instance.collection('cliente');
 
-    collRef.add({
-      'name': _namesController,
-      'date': _dateController,
+    collRef.doc(uid).set({
+      'name': _namesController.text.trim(),
+      'date': _dateController.text.trim(),
       'gender': _selectedGender,
-      'email': _emailController,
-    });
+      'email': _emailController.text.trim(),
+    }, SetOptions(merge: true));
 
     //Este es el boton para ir a la siguiente ruta
     Navigator.pushReplacement(
