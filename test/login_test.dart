@@ -25,9 +25,6 @@ void main() {
     expect(googleLoginButton, findsOneWidget);
 
     await tester.tap(googleLoginButton);
-    await tester.pump(); // Ejecuta cualquier animación
-
-    // Aquí podrías agregar una expectativa si mockeas el login real
-    // pero en web no puedes simular toda la lógica de Firebase directamente
+    await tester.pump();
   });
 }

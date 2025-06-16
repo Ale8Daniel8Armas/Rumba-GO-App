@@ -6,6 +6,11 @@ import 'edit_profile_view.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'login_view.dart';
 
+//clases adicionales para enlace de botones del bottom navbar
+import 'map_view.dart';
+import 'reviews_page.dart';
+import 'contacts_page.dart';
+
 class PerfilView extends StatefulWidget {
   const PerfilView({super.key});
 
@@ -45,9 +50,10 @@ class _PerfilViewState extends State<PerfilView> {
             const Text(
               'Perfil',
               style: TextStyle(
-                color: Colors.purple,
+                fontFamily: 'Exo',
+                color: Color(0xFFD824A6),
                 fontSize: 28,
-                fontWeight: FontWeight.bold,
+                fontWeight: FontWeight.w800,
               ),
             ),
             const SizedBox(height: 20),
@@ -166,15 +172,74 @@ class _CustomBottomNavBar extends StatelessWidget {
     return BottomAppBar(
       color: Colors.purple[900],
       child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 15.0, vertical: 8),
+        padding: const EdgeInsets.symmetric(horizontal: 15.0, vertical: 1),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceAround,
-          children: const [
-            Icon(Icons.emoji_emotions_outlined, color: Colors.white),
-            Icon(Icons.photo, color: Colors.white),
-            Icon(Icons.add_circle, color: Colors.pinkAccent, size: 40),
-            Icon(Icons.chat_bubble_outline, color: Colors.white),
-            Icon(Icons.person, color: Colors.white),
+          children: [
+            IconButton(
+              icon: const Icon(Icons.emoji_emotions_outlined,
+                  color: Color(0xFFB1FBFF), size: 50),
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => ReviewView()),
+                );
+              },
+            ),
+            IconButton(
+              icon: const Icon(Icons.photo, color: Color(0xFFB1FBFF), size: 50),
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => MapView()),
+                );
+              },
+            ),
+            GestureDetector(
+              onTap: () {
+                // Acción del botón aquí
+              },
+              child: Container(
+                width: 70,
+                height: 70,
+                decoration: BoxDecoration(
+                  color: Color(0xFFD824A6),
+                  shape: BoxShape.circle,
+                  border: Border.all(color: Colors.white, width: 4),
+                ),
+                child: const Center(
+                  child: Icon(
+                    Icons.add,
+                    color: Colors.white,
+                    size: 36,
+                  ),
+                ),
+              ),
+            ),
+            IconButton(
+              icon: const Icon(Icons.chat_bubble_outline,
+                  color: Color(0xFFB1FBFF), size: 50),
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => ContactsView()),
+                );
+              },
+            ),
+            IconButton(
+              padding: const EdgeInsets.only(top: 4),
+              icon: const Icon(
+                Icons.person,
+                color: Color(0xFFB1FBFF),
+                size: 55,
+              ),
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => PerfilView()),
+                );
+              },
+            ),
           ],
         ),
       ),

@@ -121,7 +121,6 @@ class _PersonalDataView extends State<PersonalDataView> {
       'email': _emailController.text.trim(),
     }, SetOptions(merge: true));
 
-    //Este es el boton para ir a la siguiente ruta
     Navigator.pushReplacement(
       context,
       MaterialPageRoute(
@@ -130,16 +129,37 @@ class _PersonalDataView extends State<PersonalDataView> {
     );
   }
 
+  Future<void> _loadUserData() async {
+    final uid = FirebaseAuth.instance.currentUser?.uid;
+    if (uid == null) return;
+
+    final doc =
+        await FirebaseFirestore.instance.collection('cliente').doc(uid).get();
+    if (doc.exists) {
+      final data = doc.data();
+      if (data != null) {
+        setState(() {
+          _namesController.text = data['name'] ?? '';
+          _dateController.text = data['date'] ?? '';
+          _selectedGender = data['gender'];
+          _emailController.text =
+              data['email'] ?? FirebaseAuth.instance.currentUser?.email ?? '';
+        });
+      }
+    }
+  }
+
   @override
   void initState() {
     super.initState();
     _emailController.text = FirebaseAuth.instance.currentUser?.email ?? '';
+    _loadUserData();
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFE0FFFF),
+      backgroundColor: const Color(0xFFFFFFFF),
       body: Form(
         key: _formKey,
         child: SingleChildScrollView(
@@ -149,84 +169,170 @@ class _PersonalDataView extends State<PersonalDataView> {
               const Text(
                 '¡Hola!',
                 style: TextStyle(
-                    fontSize: 28,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.pinkAccent),
-              ),
-              const SizedBox(height: 16),
-              const Text(
-                'Complete su perfil para obtener una mejor experiencia personalizada',
-                style: TextStyle(fontSize: 16),
+                    fontFamily: 'Exo',
+                    fontSize: 34,
+                    fontWeight: FontWeight.w800,
+                    color: Color(0xFFD824A6)),
               ),
               const SizedBox(height: 32),
-              TextFormField(
-                controller: _namesController,
-                decoration: const InputDecoration(
-                  labelText: 'Nombre completo',
-                  prefixIcon: Icon(Icons.person),
-                  border: OutlineInputBorder(),
-                ),
-                validator: (value) {
-                  if (value == null || value.trim().isEmpty) {
-                    return 'Ingresa tu nombre completo';
-                  }
-                  return null;
-                },
-              ),
-              const SizedBox(height: 16),
-              TextFormField(
-                controller: _dateController,
-                readOnly: true,
-                onTap: () => _selectDate(context),
-                decoration: const InputDecoration(
-                  labelText: 'Fecha de nacimiento',
-                  prefixIcon: Icon(Icons.calendar_today),
-                  border: OutlineInputBorder(),
-                ),
-                validator: (value) {
-                  if (value == null || value.trim().isEmpty) {
-                    return 'Selecciona tu fecha de nacimiento';
-                  }
-                  return null;
-                },
-              ),
-              const SizedBox(height: 16),
-              DropdownButtonFormField<String>(
-                value: _selectedGender,
-                onChanged: (value) {
-                  setState(() {
-                    _selectedGender = value;
-                  });
-                },
-                items: _genders
-                    .map((gender) => DropdownMenuItem(
-                          value: gender,
-                          child: Text(gender),
-                        ))
-                    .toList(),
-                decoration: const InputDecoration(
-                  labelText: 'Género',
-                  prefixIcon: Icon(Icons.wc),
-                  border: OutlineInputBorder(),
+              const Padding(
+                padding: EdgeInsets.symmetric(horizontal: 16),
+                child: Text(
+                  'Complete su perfil para obtener una mejor experiencia personalizada',
+                  style: TextStyle(
+                    fontFamily: 'Exo',
+                    fontSize: 16,
+                    fontWeight: FontWeight.w600,
+                  ),
                 ),
               ),
-              const SizedBox(height: 16),
-              TextFormField(
-                controller: _emailController,
-                readOnly: true,
-                decoration: const InputDecoration(
-                  labelText: 'Correo electrónico',
-                  prefixIcon: Icon(Icons.email),
-                  border: OutlineInputBorder(),
+              const SizedBox(height: 32),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    TextFormField(
+                        controller: _namesController,
+                        decoration: InputDecoration(
+                          labelText: 'Nombre completo',
+                          prefixIcon: const Icon(Icons.person),
+                          border: const UnderlineInputBorder(),
+                          enabledBorder: const UnderlineInputBorder(
+                            borderSide:
+                                BorderSide(color: Colors.black, width: 1),
+                          ),
+                          focusedBorder: const UnderlineInputBorder(
+                            borderSide:
+                                BorderSide(color: Colors.black, width: 1.2),
+                          ),
+                        ),
+                        style: TextStyle(
+                          fontFamily: 'Exo',
+                          fontWeight: FontWeight.w100,
+                        ),
+                        validator: (value) {
+                          if (value == null || value.trim().isEmpty) {
+                            return 'Ingresa tu nombre completo';
+                          }
+                          if (value.trim().length < 3 ||
+                              !value.trim().contains(' ')) {
+                            return 'Ingresa al menos un nombre y un apellido';
+                          }
+                          final regex = RegExp(r"^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s']+$");
+                          if (!regex.hasMatch(value!)) {
+                            return 'Solo se permiten letras y espacios';
+                          }
+                          return null;
+                        }),
+                    const SizedBox(height: 16),
+                    TextFormField(
+                        controller: _dateController,
+                        readOnly: true,
+                        onTap: () => _selectDate(context),
+                        decoration: InputDecoration(
+                          labelText: 'Fecha de nacimiento',
+                          prefixIcon: const Icon(Icons.calendar_today),
+                          border: const UnderlineInputBorder(),
+                          enabledBorder: const UnderlineInputBorder(
+                            borderSide:
+                                BorderSide(color: Colors.black, width: 1),
+                          ),
+                          focusedBorder: const UnderlineInputBorder(
+                            borderSide:
+                                BorderSide(color: Colors.black, width: 1.2),
+                          ),
+                        ),
+                        style: TextStyle(
+                          fontFamily: 'Exo',
+                          fontWeight: FontWeight.w100,
+                        ),
+                        validator: (value) {
+                          if (value == null || value.trim().isEmpty) {
+                            return 'Selecciona tu fecha de nacimiento';
+                          }
+
+                          try {
+                            final birthDate =
+                                DateFormat('yyyy-MM-dd').parseStrict(value);
+                            final today = DateTime.now();
+                            final age = today.year -
+                                birthDate.year -
+                                ((today.month < birthDate.month ||
+                                        (today.month == birthDate.month &&
+                                            today.day < birthDate.day))
+                                    ? 1
+                                    : 0);
+                            if (age < 18) {
+                              return 'Debes tener al menos 18 años';
+                            }
+                          } catch (e) {
+                            return 'Fecha inválida';
+                          }
+                          return null;
+                        }),
+                    const SizedBox(height: 16),
+                    DropdownButtonFormField<String>(
+                      value: _selectedGender,
+                      style: TextStyle(
+                        fontFamily: 'Exo',
+                        fontWeight: FontWeight.w100,
+                      ),
+                      onChanged: (value) {
+                        setState(() {
+                          _selectedGender = value;
+                        });
+                      },
+                      items: _genders
+                          .map((gender) => DropdownMenuItem(
+                                value: gender,
+                                child: Text(gender),
+                              ))
+                          .toList(),
+                      decoration: InputDecoration(
+                        labelText: 'Género',
+                        prefixIcon: const Icon(Icons.wc),
+                        border: const UnderlineInputBorder(),
+                        enabledBorder: const UnderlineInputBorder(
+                          borderSide: BorderSide(color: Colors.black, width: 1),
+                        ),
+                        focusedBorder: const UnderlineInputBorder(
+                          borderSide:
+                              BorderSide(color: Colors.black, width: 1.2),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+                    TextFormField(
+                      controller: _emailController,
+                      readOnly: true,
+                      decoration: InputDecoration(
+                        labelText: 'Correo electrónico',
+                        prefixIcon: const Icon(Icons.email),
+                        border: const UnderlineInputBorder(),
+                        enabledBorder: const UnderlineInputBorder(
+                          borderSide: BorderSide(color: Colors.black, width: 1),
+                        ),
+                        focusedBorder: const UnderlineInputBorder(
+                          borderSide:
+                              BorderSide(color: Colors.black, width: 1.2),
+                        ),
+                      ),
+                      style: TextStyle(
+                        fontFamily: 'Exo',
+                        fontWeight: FontWeight.w100,
+                      ),
+                      validator: (value) {
+                        if (value == null || value.trim().isEmpty) {
+                          return 'Correo no disponible';
+                        }
+                        return null;
+                      },
+                    ),
+                    const SizedBox(height: 80),
+                  ],
                 ),
-                validator: (value) {
-                  if (value == null || value.trim().isEmpty) {
-                    return 'Correo no disponible';
-                  }
-                  return null;
-                },
               ),
-              const SizedBox(height: 80),
             ],
           ),
         ),
@@ -245,7 +351,11 @@ class _PersonalDataView extends State<PersonalDataView> {
             ),
             child: const Text(
               'Continuar',
-              style: TextStyle(fontSize: 16, color: Colors.white),
+              style: TextStyle(
+                  fontFamily: 'Exo',
+                  fontSize: 16,
+                  fontWeight: FontWeight.w100,
+                  color: Colors.white),
             ),
           ),
         ),

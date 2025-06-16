@@ -19,6 +19,8 @@ dependencies:
   intl: ^0.19.0
   flutter_localizations:
     sdk: flutter
+  flutter_map: ^8.1.1
+  latlong2: ^0.9.1
 
 dev_dependencies:
   integration_test:
@@ -41,3 +43,30 @@ flutter:
     - assets/background.jpg
     - assets/logo_rumba_go.png
     - assets/google.png
+
+  fonts:
+    - family: Exo
+      fonts:
+        - asset: assets/fonts/Exo/Exo-Thin.ttf
+          weight: 100
+        - asset: assets/fonts/Exo/Exo-ExtraLight.ttf
+          weight: 200
+        - asset: assets/fonts/Exo/Exo-Light.ttf
+          weight: 300
+        - asset: assets/fonts/Exo/Exo-Regular.ttf
+          weight: 400
+        - asset: assets/fonts/Exo/Exo-Medium.ttf
+          weight: 500
+        - asset: assets/fonts/Exo/Exo-SemiBold.ttf
+          weight: 600
+        - asset: assets/fonts/Exo/Exo-Bold.ttf
+          weight: 700
+        - asset: assets/fonts/Exo/Exo-ExtraBold.ttf
+          weight: 800
+        - asset: assets/fonts/Exo/Exo-Black.ttf
+          weight: 900
+        - asset: assets/fonts/Exo/Exo-Italic.ttf
+          style: italic
+        - asset: assets/fonts/Exo/Exo-BoldItalic.ttf
+          weight: 700
+          style: italic

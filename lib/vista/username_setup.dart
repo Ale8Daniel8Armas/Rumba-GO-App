@@ -12,6 +12,27 @@ class UsernameSetupView extends StatefulWidget {
 
 class _UsernameSetupViewState extends State<UsernameSetupView> {
   final TextEditingController _usernameController = TextEditingController();
+  bool _isValid = false;
+
+  void _validateUsername(String value) {
+    setState(() {
+      _isValid = value.trim().length >= 6 && value.isNotEmpty;
+    });
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    _usernameController.addListener(() {
+      _validateUsername(_usernameController.text);
+    });
+  }
+
+  @override
+  void dispose() {
+    _usernameController.dispose();
+    super.dispose();
+  }
 
   void _onConfirm() {
     final username = _usernameController.text.trim();
@@ -46,7 +67,7 @@ class _UsernameSetupViewState extends State<UsernameSetupView> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFE0FFFF),
+      backgroundColor: const Color(0xFFFFFFFF),
       body: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 48),
         child: Column(
@@ -56,46 +77,100 @@ class _UsernameSetupViewState extends State<UsernameSetupView> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Text(
-                    '¡Comencemos!',
-                    style: TextStyle(
-                        fontSize: 28,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.pinkAccent),
+                  Center(
+                    child: Text('¡Comencemos!',
+                        style: TextStyle(
+                            fontFamily: 'Exo',
+                            fontSize: 34,
+                            fontWeight: FontWeight.w800,
+                            color: Color(0xFFD824A6))),
                   ),
-                  const SizedBox(height: 16),
-                  const Text(
-                    'Dinos cómo te gustaría que te conozcan los demás usuarios. Este nombre es único por cada uno de ellos, incluso para ti ^^',
-                    style: TextStyle(fontSize: 16),
-                  ),
-                  const SizedBox(height: 32),
-                  TextField(
-                    controller: _usernameController,
-                    decoration: InputDecoration(
-                      hintText: 'Ej. SebasRiv29013',
-                      prefixIcon: const Icon(Icons.person),
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(12),
+                  Center(
+                    child: SizedBox(
+                      width: 390,
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          const SizedBox(height: 32),
+                          const Text(
+                            'Dinos cómo te gustaría que te conozcan los demás usuarios. Este nombre es único por cada uno de ellos, incluso para ti ^^',
+                            style: TextStyle(
+                              fontFamily: 'Exo',
+                              fontSize: 18,
+                              fontWeight: FontWeight.w400,
+                            ),
+                          ),
+                          const SizedBox(height: 32),
+                          TextField(
+                            controller: _usernameController,
+                            decoration: InputDecoration(
+                              hintText: 'Ej. SebasRiv29013',
+                              border: const UnderlineInputBorder(
+                                borderSide:
+                                    BorderSide(color: Colors.black, width: 1),
+                              ),
+                              enabledBorder: const UnderlineInputBorder(
+                                borderSide:
+                                    BorderSide(color: Colors.black, width: 1),
+                              ),
+                              focusedBorder: const UnderlineInputBorder(
+                                borderSide:
+                                    BorderSide(color: Colors.black, width: 1),
+                              ),
+                              suffixIcon: Icon(
+                                _isValid ? Icons.check_circle : Icons.cancel,
+                                color: _isValid ? Colors.green : Colors.red,
+                              ),
+                            ),
+                            style: const TextStyle(
+                              fontFamily: 'Exo',
+                              fontSize: 16,
+                              fontWeight: FontWeight.w400,
+                            ),
+                          ),
+                        ],
                       ),
                     ),
                   ),
                 ],
               ),
             ),
+            const SizedBox(height: 64),
             SizedBox(
-              width: double.infinity,
-              height: 48,
-              child: ElevatedButton(
-                onPressed: _onConfirm,
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFF2E004F),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
-                  ),
+              width: 390,
+              child: Container(
+                decoration: BoxDecoration(
+                  color: const Color(0xFF1B0036),
+                  borderRadius: BorderRadius.circular(12),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.pink.withOpacity(0.8),
+                      blurRadius: 20,
+                      spreadRadius: 1,
+                      offset: const Offset(0, 0),
+                    ),
+                  ],
                 ),
-                child: const Text(
-                  'Confirmar',
-                  style: TextStyle(fontSize: 16, color: Colors.white),
+                child: ElevatedButton.icon(
+                  onPressed: _onConfirm,
+                  label: const Text(
+                    'Siguiente',
+                    style: TextStyle(
+                      fontFamily: 'Exo',
+                      fontSize: 18,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.transparent,
+                    foregroundColor: Colors.white,
+                    elevation: 0,
+                    padding: const EdgeInsets.symmetric(
+                        vertical: 14, horizontal: 20),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                  ),
                 ),
               ),
             ),

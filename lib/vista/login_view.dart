@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'username_setup.dart';
 import 'profile_view.dart';
+import 'personal_data_view.dart';
 
 class LoginView extends StatefulWidget {
   const LoginView({super.key});
@@ -43,23 +44,45 @@ class _LoginViewState extends State<LoginView> {
         return;
       }
 
-      final userDoc = await FirebaseFirestore.instance
-          .collection('cliente')
-          .doc(user.uid)
-          .get();
+      final userDocRef =
+          FirebaseFirestore.instance.collection('cliente').doc(user.uid);
+      final userDoc = await userDocRef.get();
 
-      if (userDoc.exists) {
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(
-            builder: (context) => const PerfilView(),
-          ),
-        );
-      } else {
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(builder: (context) => const UsernameSetupView()),
-        );
+      if (!userDoc.exists) {
+        await userDocRef.set({
+          'email': user.email,
+        });
+      }
+
+      final freshUserDoc = await userDocRef.get();
+      final data = freshUserDoc.data();
+
+      if (data != null) {
+        final hasUsername = data['user_name'] != null &&
+            data['user_name'].toString().isNotEmpty;
+        final hasFullName =
+            data['name'] != null && data['name'].toString().isNotEmpty;
+        final hasBirthdate =
+            data['date'] != null && data['date'].toString().isNotEmpty;
+        final hasGender =
+            data['gender'] != null && data['gender'].toString().isNotEmpty;
+
+        if (!hasUsername) {
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(builder: (context) => const UsernameSetupView()),
+          );
+        } else if (!hasFullName || !hasBirthdate || !hasGender) {
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(builder: (context) => const PersonalDataView()),
+          );
+        } else {
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(builder: (context) => const PerfilView()),
+          );
+        }
       }
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(

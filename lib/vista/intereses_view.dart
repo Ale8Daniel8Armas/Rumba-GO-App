@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'profile_view.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'personal_data_view.dart';
 
 class InteresesView extends StatefulWidget {
   const InteresesView({super.key});
@@ -83,7 +84,11 @@ class _InteresesViewState extends State<InteresesView> {
               padding: const EdgeInsets.only(left: 16, top: 8),
               child: IconButton(
                 icon: const Icon(Icons.arrow_back, color: Colors.black),
-                onPressed: () => Navigator.of(context).pop(),
+                onPressed: () => Navigator.pushReplacement(
+                  context,
+                  MaterialPageRoute(
+                      builder: (context) => const PersonalDataView()),
+                ),
               ),
             ),
             Padding(
