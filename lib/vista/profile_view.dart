@@ -2,11 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_storage/firebase_storage.dart';
+import 'package:image_picker/image_picker.dart';
+import 'package:flutter_image_compress/flutter_image_compress.dart';
+import 'dart:io';
+
 import 'edit_profile_view.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'login_view.dart';
-
-//clases adicionales para enlace de botones del bottom navbar
 import 'map_view.dart';
 import 'reviews_page.dart';
 import 'contacts_page.dart';
@@ -20,11 +23,28 @@ class PerfilView extends StatefulWidget {
 
 class _PerfilViewState extends State<PerfilView> {
   String _username = '';
+  final ImagePicker _picker = ImagePicker();
+  late Future<DocumentSnapshot> _profileFuture;
+  String descripcion = '';
+  String? facebook = '';
+  String? instagram = '';
+  String? twitter = '';
 
   @override
   void initState() {
     super.initState();
     _loadUsername();
+    _loadProfile();
+    _loadDescription();
+    _loadSocialNetworks();
+  }
+
+  void _loadProfile() {
+    final uid = FirebaseAuth.instance.currentUser?.uid;
+    if (uid != null) {
+      _profileFuture =
+          FirebaseFirestore.instance.collection('cliente').doc(uid).get();
+    }
   }
 
   Future<void> _loadUsername() async {
@@ -38,99 +58,249 @@ class _PerfilViewState extends State<PerfilView> {
     });
   }
 
+  Future<void> _loadDescription() async {
+    final uid = FirebaseAuth.instance.currentUser?.uid;
+    if (uid == null) return;
+
+    final doc =
+        await FirebaseFirestore.instance.collection('cliente').doc(uid).get();
+    setState(() {
+      descripcion = doc.data()?['descripcion'] ?? 'Sin descripción';
+    });
+  }
+
+  Future<void> _loadSocialNetworks() async {
+    final uid = FirebaseAuth.instance.currentUser?.uid;
+    if (uid == null) return;
+
+    final doc =
+        await FirebaseFirestore.instance.collection('cliente').doc(uid).get();
+
+    final data = doc.data();
+    setState(() {
+      facebook = (data?['facebook'] as String?)?.trim();
+      instagram = (data?['instagram'] as String?)?.trim();
+      twitter = (data?['twitter'] as String?)?.trim();
+    });
+  }
+
+  Future<void> _pickAndUploadImage(String? uid) async {
+    if (uid == null) {
+      print('❌ UID es null');
+      return;
+    }
+
+    final pickedImage = await _picker.pickImage(source: ImageSource.gallery);
+    if (pickedImage == null) {
+      print('📸 No se seleccionó ninguna imagen');
+      return;
+    }
+
+    try {
+      print('⬆️ Subiendo imagen a Firebase Storage...');
+
+      final storageRef =
+          FirebaseStorage.instance.ref().child('profile_images/$uid.jpg');
+
+      final compressedFile = await FlutterImageCompress.compressAndGetFile(
+        pickedImage.path,
+        '${pickedImage.path}_compressed.jpg',
+        quality: 70,
+      );
+
+      if (compressedFile == null) {
+        print('❌ Falló la compresión');
+        return;
+      }
+
+      await storageRef.putFile(File(compressedFile.path));
+
+      final downloadUrl = await storageRef.getDownloadURL();
+      print('✅ Imagen subida. URL: $downloadUrl');
+
+      await FirebaseFirestore.instance
+          .collection('cliente')
+          .doc(uid)
+          .set({'profile_image': downloadUrl}, SetOptions(merge: true));
+
+      print('✅ URL guardada en Firestore');
+
+      if (mounted) {
+        setState(() {
+          _profileFuture =
+              FirebaseFirestore.instance.collection('cliente').doc(uid).get();
+        });
+      }
+    } catch (e, stackTrace) {
+      print('❌ Error subiendo imagen: $e');
+      print('📋 StackTrace: $stackTrace');
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Error al subir imagen: $e')),
+        );
+      }
+    }
+  }
+
+  Widget _buildProfileImage() {
+    final user = FirebaseAuth.instance.currentUser;
+
+    return GestureDetector(
+      onTap: () => _pickAndUploadImage(user?.uid),
+      child: FutureBuilder<DocumentSnapshot>(
+        future: _profileFuture,
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return const CircleAvatar(
+                radius: 50, child: CircularProgressIndicator());
+          }
+
+          if (snapshot.hasError ||
+              !snapshot.hasData ||
+              !snapshot.data!.exists) {
+            return const CircleAvatar(
+              radius: 50,
+              backgroundColor: Colors.grey,
+              child: Icon(Icons.error, color: Colors.red),
+            );
+          }
+
+          final data = snapshot.data!.data() as Map<String, dynamic>?;
+
+          final imageUrl = (data != null && data.containsKey('profile_image'))
+              ? data['profile_image']
+              : '';
+
+          return CircleAvatar(
+            radius: 50,
+            backgroundColor: Colors.grey[300],
+            backgroundImage:
+                imageUrl.isNotEmpty ? NetworkImage(imageUrl) : null,
+            child: imageUrl.isEmpty
+                ? const Icon(Icons.camera_alt_outlined,
+                    size: 40, color: Colors.black54)
+                : null,
+          );
+        },
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
       bottomNavigationBar: _CustomBottomNavBar(),
       body: SafeArea(
-        child: Column(
-          children: [
-            const SizedBox(height: 20),
-            const Text(
-              'Perfil',
-              style: TextStyle(
-                fontFamily: 'Exo',
-                color: Color(0xFFD824A6),
-                fontSize: 28,
-                fontWeight: FontWeight.w800,
+        child: SingleChildScrollView(
+          child: Column(
+            children: [
+              const SizedBox(height: 20),
+              const Text(
+                'Perfil',
+                style: TextStyle(
+                  fontFamily: 'Exo',
+                  color: Color(0xFFD824A6),
+                  fontSize: 28,
+                  fontWeight: FontWeight.w800,
+                ),
               ),
-            ),
-            const SizedBox(height: 20),
-            const CircleAvatar(
-              radius: 50,
-              backgroundColor: Colors.grey,
-              child: Icon(Icons.camera_alt_outlined,
-                  size: 40, color: Colors.black54),
-            ),
-            const SizedBox(height: 10),
-            Text(
-              '@$_username',
-              style: TextStyle(
-                color: Colors.blue,
-                fontWeight: FontWeight.w600,
+              const SizedBox(height: 20),
+              _buildProfileImage(),
+              const SizedBox(height: 10),
+              Text(
+                '@$_username',
+                style: const TextStyle(
+                  color: Colors.blue,
+                  fontWeight: FontWeight.w600,
+                ),
               ),
-            ),
-            const SizedBox(height: 5),
-            const Text(
-              'Sin descripción',
-              style: TextStyle(color: Colors.black87),
-            ),
-            const SizedBox(height: 15),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: const [
-                Icon(FontAwesomeIcons.facebook, size: 24),
-                SizedBox(width: 20),
-                Icon(FontAwesomeIcons.instagram, size: 24),
-                SizedBox(width: 20),
-                Icon(FontAwesomeIcons.twitter, size: 24),
-              ],
-            ),
-            const SizedBox(height: 30),
-            /* _ListTileProfile(
-              icon: Icons.edit,
-              text: 'Agregar Redes Sociales',
-              color: Colors.blue,
-              onTap: () {},
-            ), */
-            _ListTileProfile(
-              icon: Icons.edit,
-              text: 'Editar',
-              color: Colors.blue,
-              onTap: () {
-                Navigator.pushReplacement(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => const PerfilEditableView(),
+              const SizedBox(height: 5),
+              Text(
+                '$descripcion',
+                style: const TextStyle(fontSize: 16, color: Colors.black54),
+              ),
+              const SizedBox(height: 12),
+              //Text(
+              //'Redes Sociales',
+              //style: TextStyle(
+              //  fontSize: 16,
+              //  fontWeight: FontWeight.bold,
+              //  color: Colors.black87,
+              //),
+              //),
+              const SizedBox(height: 8),
+              if ((facebook ?? '').isNotEmpty ||
+                  (instagram ?? '').isNotEmpty ||
+                  (twitter ?? '').isNotEmpty) ...[
+                Text(
+                  'Redes Sociales',
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.black87,
                   ),
-                );
-              },
-            ),
-            _ListTileProfile(
-              icon: Icons.star,
-              text: 'Apariencia',
-              color: Colors.blueAccent,
-              onTap: () {},
-            ),
-            _ListTileProfile(
-              icon: Icons.logout,
-              text: 'Salir',
-              color: Colors.red,
-              onTap: () async {
-                await GoogleSignIn().signOut();
-                await FirebaseAuth.instance.signOut();
-
-                if (context.mounted) {
-                  Navigator.pushAndRemoveUntil(
+                ),
+                const SizedBox(height: 8),
+                if ((facebook ?? '').isNotEmpty)
+                  Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 2.0),
+                    child: Text('Facebook: $facebook',
+                        style: TextStyle(fontSize: 14, color: Colors.black87)),
+                  ),
+                if ((instagram ?? '').isNotEmpty)
+                  Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 2.0),
+                    child: Text('Instagram: $instagram',
+                        style: TextStyle(fontSize: 14, color: Colors.black87)),
+                  ),
+                if ((twitter ?? '').isNotEmpty)
+                  Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 2.0),
+                    child: Text('Twitter: $twitter',
+                        style: TextStyle(fontSize: 14, color: Colors.black87)),
+                  ),
+              ],
+              const SizedBox(height: 30),
+              _ListTileProfile(
+                icon: Icons.edit,
+                text: 'Editar',
+                color: Colors.blue,
+                onTap: () {
+                  Navigator.pushReplacement(
                     context,
-                    MaterialPageRoute(builder: (context) => const LoginView()),
-                    (route) => false,
+                    MaterialPageRoute(
+                      builder: (context) => const PerfilEditableView(),
+                    ),
                   );
-                }
-              },
-            ),
-          ],
+                },
+              ),
+              _ListTileProfile(
+                icon: Icons.star,
+                text: 'Apariencia',
+                color: Colors.blueAccent,
+                onTap: () {},
+              ),
+              _ListTileProfile(
+                icon: Icons.logout,
+                text: 'Salir',
+                color: Colors.red,
+                onTap: () async {
+                  await GoogleSignIn().signOut();
+                  await FirebaseAuth.instance.signOut();
+
+                  if (context.mounted) {
+                    Navigator.pushAndRemoveUntil(
+                      context,
+                      MaterialPageRoute(
+                          builder: (context) => const LoginView()),
+                      (route) => false,
+                    );
+                  }
+                },
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -153,6 +323,7 @@ class _ListTileProfile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Column(
+      mainAxisSize: MainAxisSize.min,
       children: [
         ListTile(
           leading: Icon(icon, color: color),
@@ -166,6 +337,7 @@ class _ListTileProfile extends StatelessWidget {
   }
 }
 
+//barra de navegacion inferior
 class _CustomBottomNavBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
@@ -203,7 +375,7 @@ class _CustomBottomNavBar extends StatelessWidget {
                 width: 70,
                 height: 70,
                 decoration: BoxDecoration(
-                  color: Color(0xFFD824A6),
+                  color: const Color(0xFFD824A6),
                   shape: BoxShape.circle,
                   border: Border.all(color: Colors.white, width: 4),
                 ),
@@ -236,7 +408,7 @@ class _CustomBottomNavBar extends StatelessWidget {
               onPressed: () {
                 Navigator.push(
                   context,
-                  MaterialPageRoute(builder: (context) => PerfilView()),
+                  MaterialPageRoute(builder: (context) => const PerfilView()),
                 );
               },
             ),

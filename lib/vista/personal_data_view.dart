@@ -95,6 +95,7 @@ class _PersonalDataView extends State<PersonalDataView> {
     final birthdate = _dateController.text.trim();
     final gender = _selectedGender;
     final email = _emailController.text.trim();
+    final rol = "cliente";
 
     if (gender == null) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -108,6 +109,7 @@ class _PersonalDataView extends State<PersonalDataView> {
     print('Fecha de nacimiento: $birthdate');
     print('Género: $gender');
     print('Email: $email');
+    print('Rol: $rol');
 
     final uid = FirebaseAuth.instance.currentUser!.uid;
 
@@ -119,6 +121,7 @@ class _PersonalDataView extends State<PersonalDataView> {
       'date': _dateController.text.trim(),
       'gender': _selectedGender,
       'email': _emailController.text.trim(),
+      'rol': rol,
     }, SetOptions(merge: true));
 
     Navigator.pushReplacement(
