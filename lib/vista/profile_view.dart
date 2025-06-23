@@ -280,7 +280,7 @@ class _PerfilViewState extends State<PerfilView> {
               ),
               _ListTileProfile(
                 icon: Icons.star,
-                text: 'Apariencia',
+                text: 'Mensajes',
                 color: Colors.blueAccent,
                 onTap: () {},
               ),

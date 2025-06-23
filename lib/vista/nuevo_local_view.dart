@@ -755,8 +755,36 @@ class _NuevoLocalViewState extends State<NuevoLocalView> {
                           ),
                           child: ElevatedButton(
                             onPressed: () async {
-                              await controller.publicarNuevoLocal();
-                              Navigator.pop(context);
+                              final errores = controller.validarFormulario();
+                              setState(() {});
+
+                              if (errores.isEmpty) {
+                                await controller.publicarNuevoLocal();
+                                Navigator.pop(context);
+                              } else {
+                                showDialog(
+                                  context: context,
+                                  builder: (context) => AlertDialog(
+                                    title:
+                                        Text("Corrija los siguientes errores:"),
+                                    content: SingleChildScrollView(
+                                      child: Column(
+                                        children: errores
+                                            .map((e) => Text("• $e",
+                                                style: TextStyle(
+                                                    color: Colors.red)))
+                                            .toList(),
+                                      ),
+                                    ),
+                                    actions: [
+                                      TextButton(
+                                        onPressed: () => Navigator.pop(context),
+                                        child: Text("Entendido"),
+                                      )
+                                    ],
+                                  ),
+                                );
+                              }
                             },
                             style: ElevatedButton.styleFrom(
                               backgroundColor: Colors.transparent,

@@ -20,6 +20,21 @@ class NuevoLocalController {
   final TextEditingController paginaWebController = TextEditingController();
   final TextEditingController aforoMaximoController = TextEditingController();
 
+  //variables auxiliares para las validaciones
+  String? nombreError;
+  String? tipoLocalError;
+  String? musicaError;
+  String? ambienteError;
+  String? bebidasError;
+  String? descripcionError;
+  String? direccionError;
+  String? coordenadasError;
+  String? zonaError;
+  String? telefonoError;
+  String? correoError;
+  String? serviciosError;
+  String? aforoError;
+
   // Zonas
   final List<String> zonasQuito = [
     'La Mariscal',
@@ -268,5 +283,132 @@ class NuevoLocalController {
   // Hora
   String formatearHora(TimeOfDay hora) {
     return '${hora.hour.toString().padLeft(2, '0')}:${hora.minute.toString().padLeft(2, '0')}';
+  }
+
+  // validaciones
+  List<String> validarFormulario() {
+    List<String> errores = [];
+
+    // Limpiar errores previos
+    nombreError = tipoLocalError = musicaError = ambienteError = bebidasError =
+        descripcionError = direccionError = coordenadasError = zonaError =
+            telefonoError = correoError = serviciosError = aforoError = null;
+
+    // 1) Validación nombre del local
+    if (nombreController.text.isEmpty) {
+      nombreError = "El nombre del local es obligatorio";
+      errores.add(nombreError!);
+    } else if (nombreController.text.split(' ').length > 30) {
+      nombreError = "El nombre no puede exceder 30 palabras";
+      errores.add(nombreError!);
+    }
+
+    // 2) Validación tipo de local
+    if (tipoLocalSeleccionado == null || tipoLocalSeleccionado!.isEmpty) {
+      tipoLocalError = "Seleccione un tipo de local";
+      errores.add(tipoLocalError!);
+    }
+
+    // 3) Validación categorías (música, ambiente, bebidas)
+    if (!musicOptions.any((op) => op['selected'])) {
+      musicaError = "Seleccione al menos un tipo de música";
+      errores.add(musicaError!);
+    }
+
+    if (!ambienceOptions.any((op) => op['selected'])) {
+      ambienteError = "Seleccione al menos un tipo de ambiente";
+      errores.add(ambienteError!);
+    }
+
+    if (!drinksOptions.any((op) => op['selected'])) {
+      bebidasError = "Seleccione al menos un tipo de bebida";
+      errores.add(bebidasError!);
+    }
+
+    // 4) Validación descripción
+    if (descripcionController.text.split(' ').length > 254) {
+      descripcionError = "La descripción no puede exceder 254 palabras";
+      errores.add(descripcionError!);
+    }
+
+    // 5) Validación dirección
+    if (direccionController.text.isEmpty) {
+      direccionError = "La dirección es obligatoria";
+      errores.add(direccionError!);
+    } else if (direccionController.text.split(' ').length > 30) {
+      direccionError = "La dirección no puede exceder 30 palabras";
+      errores.add(direccionError!);
+    }
+
+    // 6) Validación coordenadas GPS
+    if (latitudController.text.isEmpty || longitudController.text.isEmpty) {
+      coordenadasError = "Las coordenadas GPS son obligatorias";
+      errores.add(coordenadasError!);
+    }
+
+    // 7) Validación zona
+    if (zonaSeleccionada == null || zonaSeleccionada!.isEmpty) {
+      zonaError = "Seleccione una zona";
+      errores.add(zonaError!);
+    }
+
+    // 8) Validación teléfonos
+    for (var telController in telefonosControllers) {
+      if (telController.text.isEmpty) {
+        telefonoError = "El teléfono es obligatorio";
+        errores.add(telefonoError!);
+        break;
+      }
+      if (!RegExp(r'^[0-9]+$').hasMatch(telController.text)) {
+        telefonoError = "El teléfono solo debe contener números";
+        errores.add(telefonoError!);
+        break;
+      }
+      if (telController.text.length != 10) {
+        telefonoError = "El teléfono debe tener 10 dígitos";
+        errores.add(telefonoError!);
+        break;
+      }
+    }
+
+    // 9) Validación correo electrónico
+    if (correoController.text.isEmpty) {
+      correoError = "El correo electrónico es obligatorio";
+      errores.add(correoError!);
+    } else if (!correoController.text.contains('@')) {
+      correoError = "El correo debe contener @";
+      errores.add(correoError!);
+    } else if (!RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$')
+        .hasMatch(correoController.text)) {
+      correoError = "Formato de correo inválido";
+      errores.add(correoError!);
+    }
+
+    // 10) Validación servicios y comodidades
+    final serviciosSeleccionados =
+        serviciosDisponibles.where((s) => s['selected']).length;
+    if (serviciosSeleccionados < 3) {
+      serviciosError = "Seleccione al menos 3 servicios/comodidades";
+      errores.add(serviciosError!);
+    }
+
+    // 11) Validación aforo máximo
+    if (aforoMaximoController.text.isEmpty) {
+      aforoError = "El aforo máximo es obligatorio";
+      errores.add(aforoError!);
+    } else {
+      try {
+        int aforo = int.parse(aforoMaximoController.text);
+        if (aforo < 1 || aforo > 1000) {
+          aforoError = "El aforo debe estar entre 1 y 1000";
+          errores.add(aforoError!);
+        }
+      } catch (e) {
+        aforoError = "Ingrese un número válido en el aforo";
+        errores.add(aforoError!);
+      }
+    }
+
+    return errores;
   }
 }

@@ -8,6 +8,7 @@ import 'map_view.dart';
 import 'reviews_page.dart';
 import 'contacts_page.dart';
 import 'nuevo_local_view.dart';
+import 'locales_usuario_view.dart';
 
 class PerfilEditableView extends StatefulWidget {
   const PerfilEditableView({super.key});
@@ -18,6 +19,7 @@ class PerfilEditableView extends StatefulWidget {
 
 class _PerfilEditableViewState extends State<PerfilEditableView> {
   bool isEditing = false;
+  bool _esPropietario = false;
 
   final TextEditingController _nombreController = TextEditingController();
   final TextEditingController _fechaController = TextEditingController();
@@ -52,6 +54,7 @@ class _PerfilEditableViewState extends State<PerfilEditableView> {
           _facebookController.text = data['facebook'] ?? '';
           _instagramController.text = data['instagram'] ?? '';
           _twitterController.text = data['twitter'] ?? '';
+          _esPropietario = data['rol'] == 'propietario';
         });
       }
     }
@@ -396,6 +399,7 @@ class _PerfilEditableViewState extends State<PerfilEditableView> {
                   ),
                 ),
               ),
+              //Botón de registro del negocio o local de entretenimiento
               const SizedBox(height: 18),
               Container(
                 width: double.infinity,
@@ -440,6 +444,58 @@ class _PerfilEditableViewState extends State<PerfilEditableView> {
                   ),
                 ),
               ),
+              //Botón de revisión de los negocios del propietario
+              const SizedBox(height: 14),
+              if (_esPropietario)
+                Column(
+                  children: [
+                    Container(
+                      width: double.infinity,
+                      decoration: BoxDecoration(
+                        color: const Color.fromARGB(255, 213, 231, 229),
+                        borderRadius: BorderRadius.circular(12),
+                        boxShadow: [
+                          BoxShadow(
+                            color: const Color.fromARGB(255, 203, 233, 30)
+                                .withOpacity(0.5),
+                            blurRadius: 10,
+                            spreadRadius: 1,
+                            offset: const Offset(0, 0),
+                          ),
+                        ],
+                      ),
+                      child: ElevatedButton.icon(
+                        onPressed: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                                builder: (context) => LocalesUsuarioView()),
+                          );
+                        },
+                        icon: const Icon(Icons.local_mall_rounded,
+                            color: Colors.white),
+                        label: const Text(
+                          'Gestiona tus locales',
+                          style: TextStyle(
+                            fontFamily: 'Exo',
+                            fontSize: 16,
+                            fontWeight: FontWeight.w500,
+                            color: Colors.white,
+                          ),
+                        ),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.transparent,
+                          shadowColor: Colors.white,
+                          padding: const EdgeInsets.symmetric(
+                              vertical: 16, horizontal: 24),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
             ],
           ),
         ),
