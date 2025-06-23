@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:intl/intl.dart';
 
 import 'profile_view.dart';
 import 'map_view.dart';
 import 'reviews_page.dart';
 import 'contacts_page.dart';
+import 'nuevo_local_view.dart';
 
 class PerfilEditableView extends StatefulWidget {
   const PerfilEditableView({super.key});
@@ -83,47 +85,204 @@ class _PerfilEditableViewState extends State<PerfilEditableView> {
 
   Widget _buildEditableField(String label, TextEditingController controller,
       {bool editable = true}) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(label,
-            style: const TextStyle(
-              color: Colors.purple,
-              fontWeight: FontWeight.bold,
-            )),
-        const SizedBox(height: 4),
-        isEditing && editable
-            ? TextFormField(
-                controller: controller,
-                maxLines: label == 'Descripción personal' ? 5 : 1,
-                maxLength: label == 'Descripción personal' ? null : null,
-                decoration: const InputDecoration(
-                  border: OutlineInputBorder(),
-                  contentPadding: EdgeInsets.symmetric(horizontal: 8),
-                ),
-                onChanged: label == 'Descripción personal'
-                    ? (value) {
-                        final wordCount =
-                            value.trim().split(RegExp(r'\s+')).length;
-                        if (wordCount > 100) {
-                          final trimmed = value
-                              .trim()
-                              .split(RegExp(r'\s+'))
-                              .sublist(0, 100)
-                              .join(' ');
-                          controller.text = trimmed;
-                          controller.selection = TextSelection.fromPosition(
-                              TextPosition(offset: trimmed.length));
-                        }
-                      }
-                    : null,
-              )
-            : Text(
-                controller.text,
-                style: const TextStyle(color: Colors.black87),
-              ),
-        const SizedBox(height: 16),
-      ],
+    const TextStyle fieldTextStyle = TextStyle(
+      fontFamily: 'Exo',
+      fontSize: 16,
+      fontWeight: FontWeight.w200,
+      color: Colors.black,
+    );
+
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 24),
+      child: SizedBox(
+        width: double.infinity,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(label,
+                style: const TextStyle(
+                  fontSize: 16,
+                  color: Color(0xFFD824A6),
+                  fontWeight: FontWeight.w600,
+                )),
+            const SizedBox(height: 8),
+            isEditing && editable
+                ? TextFormField(
+                    controller: controller,
+                    maxLines: label == 'Descripción personal' ? 3 : 1,
+                    style: fieldTextStyle,
+                    decoration: const InputDecoration(
+                      isDense: true,
+                      contentPadding: EdgeInsets.symmetric(vertical: 8),
+                      enabledBorder: UnderlineInputBorder(
+                        borderSide: BorderSide(color: Colors.black, width: 1),
+                      ),
+                      focusedBorder: UnderlineInputBorder(
+                        borderSide: BorderSide(color: Colors.black, width: 1.5),
+                      ),
+                    ),
+                  )
+                : Container(
+                    width: double.infinity,
+                    decoration: const BoxDecoration(
+                      border: Border(
+                        bottom: BorderSide(
+                          color: Colors.black,
+                          width: 1,
+                        ),
+                      ),
+                    ),
+                    padding: const EdgeInsets.symmetric(vertical: 8),
+                    child: Text(
+                      controller.text.isNotEmpty ? controller.text : ' ',
+                      style: fieldTextStyle,
+                    ),
+                  ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildDateField() {
+    const TextStyle fieldTextStyle = TextStyle(
+      fontFamily: 'Exo',
+      fontSize: 16,
+      fontWeight: FontWeight.w200,
+      color: Colors.black,
+    );
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 24),
+      child: SizedBox(
+        width: double.infinity,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Text('Fecha de Nacimiento',
+                style: TextStyle(
+                  fontSize: 16,
+                  color: Color(0xFFD824A6),
+                  fontWeight: FontWeight.w600,
+                )),
+            const SizedBox(height: 8),
+            isEditing
+                ? TextFormField(
+                    controller: _fechaController,
+                    readOnly: true,
+                    onTap: () => _selectDate(context),
+                    style: fieldTextStyle,
+                    decoration: const InputDecoration(
+                      isDense: true,
+                      contentPadding: EdgeInsets.symmetric(vertical: 8),
+                      enabledBorder: UnderlineInputBorder(
+                        borderSide: BorderSide(color: Colors.black, width: 1),
+                      ),
+                      focusedBorder: UnderlineInputBorder(
+                        borderSide: BorderSide(color: Colors.black, width: 1.5),
+                      ),
+                    ),
+                  )
+                : Container(
+                    width: double.infinity,
+                    decoration: const BoxDecoration(
+                      border: Border(
+                        bottom: BorderSide(
+                          color: Colors.black,
+                          width: 1,
+                        ),
+                      ),
+                    ),
+                    padding: const EdgeInsets.symmetric(vertical: 8),
+                    child: Text(
+                      _fechaController.text.isNotEmpty
+                          ? _fechaController.text
+                          : ' ',
+                      style: fieldTextStyle,
+                    ),
+                  ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildGenderField() {
+    const TextStyle fieldTextStyle = TextStyle(
+      fontFamily: 'Exo',
+      fontSize: 16,
+      fontWeight: FontWeight.w200,
+      color: Colors.black,
+    );
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 24),
+      child: SizedBox(
+        width: double.infinity,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Text('Género',
+                style: TextStyle(
+                  fontSize: 16,
+                  color: Color(0xFFD824A6),
+                  fontWeight: FontWeight.w600,
+                )),
+            const SizedBox(height: 8),
+            isEditing
+                ? DropdownButtonFormField<String>(
+                    isExpanded: true,
+                    value: _generoController.text.isEmpty
+                        ? null
+                        : _generoController.text,
+                    style: fieldTextStyle,
+                    decoration: const InputDecoration(
+                      isDense: true,
+                      contentPadding: EdgeInsets.only(bottom: 8),
+                      enabledBorder: UnderlineInputBorder(
+                        borderSide: BorderSide(color: Colors.black, width: 1),
+                      ),
+                      focusedBorder: UnderlineInputBorder(
+                        borderSide: BorderSide(color: Colors.black, width: 1.5),
+                      ),
+                    ),
+                    items: [
+                      'Masculino',
+                      'Femenino',
+                      'No binario',
+                      'Prefiero no decirlo',
+                      'Otro'
+                    ].map((String value) {
+                      return DropdownMenuItem<String>(
+                        value: value,
+                        child: Text(value),
+                      );
+                    }).toList(),
+                    onChanged: (value) {
+                      setState(() {
+                        _generoController.text = value ?? '';
+                      });
+                    },
+                  )
+                : Container(
+                    width: double.infinity,
+                    decoration: const BoxDecoration(
+                      border: Border(
+                        bottom: BorderSide(
+                          color: Colors.black,
+                          width: 1,
+                        ),
+                      ),
+                    ),
+                    padding: const EdgeInsets.symmetric(vertical: 8),
+                    child: Text(
+                      _generoController.text.isNotEmpty
+                          ? _generoController.text
+                          : ' ',
+                      style: fieldTextStyle,
+                    ),
+                  ),
+          ],
+        ),
+      ),
     );
   }
 
@@ -131,10 +290,16 @@ class _PerfilEditableViewState extends State<PerfilEditableView> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('         Datos Personales',
-            style: TextStyle(color: Colors.purple)),
+        centerTitle: true,
+        title: const Text('Datos Personales',
+            style: TextStyle(
+              color: Color(0xFFD824A6),
+              fontFamily: 'Exo',
+              fontSize: 28,
+              fontWeight: FontWeight.w800,
+            )),
         leading: IconButton(
-            icon: const Icon(Icons.arrow_back, color: Colors.purple),
+            icon: const Icon(Icons.arrow_back, color: Colors.black),
             onPressed: () {
               Navigator.pushReplacement(
                 context,
@@ -145,8 +310,11 @@ class _PerfilEditableViewState extends State<PerfilEditableView> {
             }),
         actions: [
           IconButton(
-            icon: Icon(isEditing ? Icons.close : Icons.edit,
-                color: Colors.purple),
+            icon: Icon(
+              isEditing ? Icons.close : Icons.edit,
+              color: Colors.blue,
+              size: 20,
+            ),
             onPressed: () {
               setState(() {
                 isEditing = !isEditing;
@@ -166,8 +334,8 @@ class _PerfilEditableViewState extends State<PerfilEditableView> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               _buildEditableField('Nombre y Apellidos', _nombreController),
-              _buildEditableField('Fecha de Nacimiento', _fechaController),
-              _buildEditableField('Género', _generoController),
+              _buildDateField(),
+              _buildGenderField(),
               _buildEditableField('Correo', _correoController, editable: false),
               _buildEditableField(
                   'Descripción personal', _descripcionController),
@@ -176,75 +344,98 @@ class _PerfilEditableViewState extends State<PerfilEditableView> {
               _buildEditableField('Twitter', _twitterController),
               if (isEditing)
                 Center(
-                  child: ElevatedButton.icon(
-                    onPressed: _saveChanges,
-                    icon: const Icon(Icons.save),
-                    label: const Text('Guardar cambios'),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.purple,
-                      foregroundColor: Colors.white,
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 24, vertical: 12),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
+                  child: Container(
+                    margin: const EdgeInsets.only(top: 10),
+                    width: 150,
+                    decoration: BoxDecoration(
+                      color: Color(0xFFD824A6),
+                      borderRadius: BorderRadius.circular(12),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.cyanAccent.withOpacity(0.6),
+                          blurRadius: 10,
+                          spreadRadius: 1,
+                          offset: const Offset(0, 0),
+                        ),
+                      ],
+                      border: Border.all(
+                        color: Colors.deepPurple,
+                        width: 1.5,
+                      ),
+                    ),
+                    child: ElevatedButton(
+                      onPressed: _saveChanges,
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.transparent,
+                        foregroundColor: Colors.white,
+                        elevation: 0,
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 40, vertical: 16),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                      ),
+                      child: const Text(
+                        'Guardar',
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                        ),
                       ),
                     ),
                   ),
                 ),
-              const SizedBox(height: 24),
-              Text(
-                '¿Eres un propietario o tienes tu local?',
-                style: TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.black87,
-                  fontFamily: 'Exo',
+              const SizedBox(height: 16),
+              Center(
+                child: Text(
+                  '¿Eres un propietario o tienes tu local?',
+                  style: TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.blue,
+                  ),
                 ),
               ),
               const SizedBox(height: 18),
-              SizedBox(
+              Container(
                 width: double.infinity,
-                child: Container(
-                  decoration: BoxDecoration(
-                    color: const Color(0xFF1B0036),
-                    borderRadius: BorderRadius.circular(12),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.pink.withOpacity(0.6),
-                        blurRadius: 10,
-                        spreadRadius: 1,
-                        offset: const Offset(0, 0),
-                      ),
-                    ],
-                  ),
-                  child: ElevatedButton.icon(
-                    onPressed: () {
-                      // Acción al presionar
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(
-                            content:
-                                Text('Funcionalidad próximamente disponible.')),
-                      );
-                    },
-                    icon: const Icon(Icons.store_mall_directory_rounded,
-                        color: Colors.white),
-                    label: const Text(
-                      'Registra tu negocio',
-                      style: TextStyle(
-                        fontFamily: 'Exo',
-                        fontSize: 18,
-                        fontWeight: FontWeight.w500,
-                      ),
+                decoration: BoxDecoration(
+                  color: const Color(0xFF1B0036),
+                  borderRadius: BorderRadius.circular(12),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.pink.withOpacity(0.6),
+                      blurRadius: 10,
+                      spreadRadius: 1,
+                      offset: const Offset(0, 0),
                     ),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.transparent,
-                      foregroundColor: Colors.white,
-                      elevation: 0,
-                      padding: const EdgeInsets.symmetric(
-                          vertical: 14, horizontal: 20),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
-                      ),
+                  ],
+                ),
+                child: ElevatedButton.icon(
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (context) => NuevoLocalView()),
+                    );
+                  },
+                  icon: const Icon(Icons.store_mall_directory_rounded,
+                      color: Colors.white),
+                  label: const Text(
+                    'Registra tu negocio',
+                    style: TextStyle(
+                      fontFamily: 'Exo',
+                      fontSize: 16,
+                      fontWeight: FontWeight.w500,
+                      color: Colors.white,
+                    ),
+                  ),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.transparent,
+                    shadowColor: Colors.transparent,
+                    padding: const EdgeInsets.symmetric(
+                        vertical: 16, horizontal: 24),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
                     ),
                   ),
                 ),
@@ -255,9 +446,70 @@ class _PerfilEditableViewState extends State<PerfilEditableView> {
       ),
     );
   }
+
+  Future<void> _selectDate(BuildContext context) async {
+    try {
+      final DateTime? picked = await showDatePicker(
+        context: context,
+        initialDate: _fechaController.text.isNotEmpty
+            ? DateFormat('yyyy-MM-dd').parse(_fechaController.text)
+            : DateTime.now(),
+        firstDate: DateTime(1900),
+        lastDate: DateTime.now(),
+        helpText: 'Selecciona tu fecha de nacimiento',
+        locale: const Locale("es", "ES"),
+      );
+
+      if (picked != null) {
+        setState(() {
+          _fechaController.text = DateFormat('yyyy-MM-dd').format(picked);
+        });
+      }
+    } catch (e) {
+      final manualController = TextEditingController();
+      await showDialog(
+        context: context,
+        builder: (context) => AlertDialog(
+          title: const Text('Ingresa tu fecha de nacimiento'),
+          content: TextField(
+            controller: manualController,
+            decoration: const InputDecoration(
+              hintText: 'Formato: yyyy-MM-dd',
+              labelText: 'Fecha de nacimiento',
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: const Text('Cancelar'),
+            ),
+            ElevatedButton(
+              onPressed: () {
+                final input = manualController.text.trim();
+                try {
+                  final parsedDate =
+                      DateFormat('yyyy-MM-dd').parseStrict(input);
+                  setState(() {
+                    _fechaController.text =
+                        DateFormat('yyyy-MM-dd').format(parsedDate);
+                  });
+                  Navigator.pop(context);
+                } catch (e) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                        content: Text('Formato inválido. Usa yyyy-MM-dd')),
+                  );
+                }
+              },
+              child: const Text('Aceptar'),
+            ),
+          ],
+        ),
+      );
+    }
+  }
 }
 
-//barra de navegacion inferior
 class _CustomBottomNavBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {

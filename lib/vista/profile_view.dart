@@ -199,8 +199,8 @@ class _PerfilViewState extends State<PerfilView> {
               const Text(
                 'Perfil',
                 style: TextStyle(
-                  fontFamily: 'Exo',
                   color: Color(0xFFD824A6),
+                  fontFamily: 'Exo',
                   fontSize: 28,
                   fontWeight: FontWeight.w800,
                 ),
@@ -212,13 +212,19 @@ class _PerfilViewState extends State<PerfilView> {
                 '@$_username',
                 style: const TextStyle(
                   color: Colors.blue,
+                  fontFamily: 'Exo',
                   fontWeight: FontWeight.w600,
                 ),
               ),
               const SizedBox(height: 5),
               Text(
                 '$descripcion',
-                style: const TextStyle(fontSize: 16, color: Colors.black54),
+                style: const TextStyle(
+                  fontFamily: 'Exo',
+                  fontSize: 16,
+                  color: Colors.black54,
+                  fontWeight: FontWeight.w200,
+                ),
               ),
               const SizedBox(height: 12),
               //Text(
@@ -236,8 +242,9 @@ class _PerfilViewState extends State<PerfilView> {
                 Text(
                   'Redes Sociales',
                   style: TextStyle(
+                    fontFamily: 'Exo',
                     fontSize: 16,
-                    fontWeight: FontWeight.bold,
+                    fontWeight: FontWeight.w300,
                     color: Colors.black87,
                   ),
                 ),
@@ -246,19 +253,34 @@ class _PerfilViewState extends State<PerfilView> {
                   Padding(
                     padding: const EdgeInsets.symmetric(vertical: 2.0),
                     child: Text('Facebook: $facebook',
-                        style: TextStyle(fontSize: 14, color: Colors.black87)),
+                        style: TextStyle(
+                          fontFamily: 'Exo',
+                          fontSize: 14,
+                          color: Colors.black87,
+                          fontWeight: FontWeight.w200,
+                        )),
                   ),
                 if ((instagram ?? '').isNotEmpty)
                   Padding(
                     padding: const EdgeInsets.symmetric(vertical: 2.0),
                     child: Text('Instagram: $instagram',
-                        style: TextStyle(fontSize: 14, color: Colors.black87)),
+                        style: TextStyle(
+                          fontFamily: 'Exo',
+                          fontSize: 14,
+                          color: Colors.black87,
+                          fontWeight: FontWeight.w200,
+                        )),
                   ),
                 if ((twitter ?? '').isNotEmpty)
                   Padding(
                     padding: const EdgeInsets.symmetric(vertical: 2.0),
                     child: Text('Twitter: $twitter',
-                        style: TextStyle(fontSize: 14, color: Colors.black87)),
+                        style: TextStyle(
+                          fontFamily: 'Exo',
+                          fontSize: 14,
+                          color: Colors.black87,
+                          fontWeight: FontWeight.w200,
+                        )),
                   ),
               ],
               const SizedBox(height: 30),
