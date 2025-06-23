@@ -65,7 +65,7 @@ class _PerfilViewState extends State<PerfilView> {
     final doc =
         await FirebaseFirestore.instance.collection('cliente').doc(uid).get();
     setState(() {
-      descripcion = doc.data()?['descripcion'] ?? 'Sin descripción';
+      descripcion = doc.data()?['description'] ?? 'Sin descripción';
     });
   }
 
@@ -226,29 +226,10 @@ class _PerfilViewState extends State<PerfilView> {
                   fontWeight: FontWeight.w200,
                 ),
               ),
-              const SizedBox(height: 12),
-              //Text(
-              //'Redes Sociales',
-              //style: TextStyle(
-              //  fontSize: 16,
-              //  fontWeight: FontWeight.bold,
-              //  color: Colors.black87,
-              //),
-              //),
-              const SizedBox(height: 8),
+              const SizedBox(height: 4),
               if ((facebook ?? '').isNotEmpty ||
                   (instagram ?? '').isNotEmpty ||
                   (twitter ?? '').isNotEmpty) ...[
-                Text(
-                  'Redes Sociales',
-                  style: TextStyle(
-                    fontFamily: 'Exo',
-                    fontSize: 16,
-                    fontWeight: FontWeight.w300,
-                    color: Colors.black87,
-                  ),
-                ),
-                const SizedBox(height: 8),
                 if ((facebook ?? '').isNotEmpty)
                   Padding(
                     padding: const EdgeInsets.symmetric(vertical: 2.0),
@@ -263,7 +244,7 @@ class _PerfilViewState extends State<PerfilView> {
                 if ((instagram ?? '').isNotEmpty)
                   Padding(
                     padding: const EdgeInsets.symmetric(vertical: 2.0),
-                    child: Text('Instagram: $instagram',
+                    child: Text('Instagram: @$instagram',
                         style: TextStyle(
                           fontFamily: 'Exo',
                           fontSize: 14,
@@ -274,7 +255,7 @@ class _PerfilViewState extends State<PerfilView> {
                 if ((twitter ?? '').isNotEmpty)
                   Padding(
                     padding: const EdgeInsets.symmetric(vertical: 2.0),
-                    child: Text('Twitter: $twitter',
+                    child: Text('Twitter: @$twitter',
                         style: TextStyle(
                           fontFamily: 'Exo',
                           fontSize: 14,

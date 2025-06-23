@@ -1,5 +1,7 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
 import '../controlador/LocalController.dart';
+import 'package:image_picker/image_picker.dart';
 
 class NuevoLocalView extends StatefulWidget {
   const NuevoLocalView({super.key});
@@ -10,6 +12,26 @@ class NuevoLocalView extends StatefulWidget {
 
 class _NuevoLocalViewState extends State<NuevoLocalView> {
   final NuevoLocalController controller = NuevoLocalController();
+
+  Future<void> _seleccionarFotosLocal() async {
+    final picker = ImagePicker();
+    final List<XFile>? fotos = await picker.pickMultiImage();
+    if (fotos != null && fotos.isNotEmpty) {
+      setState(() {
+        controller.fotosLocal.addAll(fotos.map((f) => File(f.path)));
+      });
+    }
+  }
+
+  Future<void> _seleccionarLogo() async {
+    final picker = ImagePicker();
+    final XFile? logo = await picker.pickImage(source: ImageSource.gallery);
+    if (logo != null) {
+      setState(() {
+        controller.logoFile = File(logo.path);
+      });
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -534,6 +556,94 @@ class _NuevoLocalViewState extends State<NuevoLocalView> {
                             controller.tiktokController, 'TikTok'),
                         _buildRedSocialInput(
                             controller.paginaWebController, 'Página Web'),
+                      ],
+                    ),
+                    Divider(color: Colors.cyanAccent, thickness: 1.5),
+                    const SizedBox(height: 12),
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const Text(
+                          'Fotos de local:',
+                          style: TextStyle(
+                            fontFamily: 'Exo',
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.black87,
+                          ),
+                        ),
+                        const SizedBox(height: 10),
+                        Center(
+                          child: ElevatedButton(
+                            onPressed: _seleccionarFotosLocal,
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: Colors.cyan.shade50,
+                              shape: StadiumBorder(),
+                            ),
+                            child: const Text(
+                              '+ Agregar fotos',
+                              style: TextStyle(
+                                fontFamily: 'Exo',
+                                fontWeight: FontWeight.w500,
+                                fontSize: 16,
+                                color: Colors.black,
+                              ),
+                            ),
+                          ),
+                        ),
+                        const SizedBox(height: 10),
+                        Wrap(
+                          spacing: 10,
+                          children: controller.fotosLocal
+                              .map((foto) => ClipRRect(
+                                    borderRadius: BorderRadius.circular(8),
+                                    child: Image.file(foto,
+                                        width: 80,
+                                        height: 80,
+                                        fit: BoxFit.cover),
+                                  ))
+                              .toList(),
+                        ),
+                        const SizedBox(height: 20),
+                        const Text(
+                          'Logotipo:',
+                          style: TextStyle(
+                            fontFamily: 'Exo',
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.black87,
+                          ),
+                        ),
+                        const SizedBox(height: 10),
+                        Center(
+                          child: ElevatedButton(
+                            onPressed: _seleccionarLogo,
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: Colors.cyan.shade50,
+                              shape: StadiumBorder(),
+                            ),
+                            child: const Text(
+                              '+ Agregar logo',
+                              style: TextStyle(
+                                fontFamily: 'Exo',
+                                fontWeight: FontWeight.w500,
+                                fontSize: 16,
+                                color: Colors.black,
+                              ),
+                            ),
+                          ),
+                        ),
+                        const SizedBox(height: 10),
+                        if (controller.logoFile != null)
+                          ClipRRect(
+                            borderRadius: BorderRadius.circular(12),
+                            child: Image.file(
+                              controller.logoFile!,
+                              width: 100,
+                              height: 100,
+                              fit: BoxFit.cover,
+                            ),
+                          ),
                       ],
                     ),
                     Divider(color: Colors.cyanAccent, thickness: 1.5),

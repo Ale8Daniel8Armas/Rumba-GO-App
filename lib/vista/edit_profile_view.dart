@@ -48,7 +48,7 @@ class _PerfilEditableViewState extends State<PerfilEditableView> {
           _fechaController.text = data['date'] ?? '';
           _generoController.text = data['gender'] ?? '';
           _correoController.text = user.email ?? '';
-          _descripcionController.text = data['descripcion'] ?? '';
+          _descripcionController.text = data['description'] ?? '';
           _facebookController.text = data['facebook'] ?? '';
           _instagramController.text = data['instagram'] ?? '';
           _twitterController.text = data['twitter'] ?? '';
