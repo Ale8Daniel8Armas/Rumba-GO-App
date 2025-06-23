@@ -222,61 +222,62 @@ class _NuevoLocalViewState extends State<NuevoLocalView> {
                     ),
                     Divider(color: Colors.cyanAccent, thickness: 1.5),
                     const SizedBox(height: 12),
-                    Text(
-                      'Días y horarios de atención:',
-                      style: const TextStyle(
-                        fontFamily: 'Exo',
-                        fontSize: 16,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.black87,
-                      ),
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const Text(
+                          'Días y horarios de atención:',
+                          style: TextStyle(
+                            fontFamily: 'Exo',
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.black87,
+                          ),
+                        ),
+                        const SizedBox(height: 10),
+                        ...List.generate(controller.horarios.length, (i) {
+                          return Padding(
+                            padding: const EdgeInsets.symmetric(vertical: 4.0),
+                            child: Row(
+                              children: [
+                                SizedBox(
+                                  width: 80,
+                                  child: Text(
+                                    '${controller.horarios[i]['dia']}:',
+                                    style: const TextStyle(
+                                      fontFamily: 'Exo',
+                                      fontSize: 16,
+                                      fontWeight: FontWeight.w200,
+                                      color: Colors.black,
+                                    ),
+                                  ),
+                                ),
+                                const SizedBox(width: 8),
+                                Expanded(
+                                  child: _HoraCaja(
+                                    hora: controller.formatearHora(
+                                        controller.horarios[i]['inicio']),
+                                    onTap: () =>
+                                        _seleccionarHora(context, i, true),
+                                  ),
+                                ),
+                                const SizedBox(width: 4),
+                                const Text('—'),
+                                const SizedBox(width: 4),
+                                Expanded(
+                                  child: _HoraCaja(
+                                    hora: controller.formatearHora(
+                                        controller.horarios[i]['fin']),
+                                    onTap: () =>
+                                        _seleccionarHora(context, i, false),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          );
+                        }),
+                      ],
                     ),
-                    const SizedBox(height: 10),
-                    ...List.generate(controller.horarios.length, (i) {
-                      return Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Text(
-                            controller.horarios[i]['dia'] as String,
-                            style: const TextStyle(
-                              fontFamily: 'Exo',
-                              fontSize: 16,
-                              color: Colors.black,
-                              fontWeight: FontWeight.w200,
-                            ),
-                          ),
-                          TextButton(
-                            onPressed: () =>
-                                controller.seleccionarHora(context, i, true),
-                            child: Text(
-                              controller.formatearHora(
-                                  controller.horarios[i]['inicio']),
-                              style: const TextStyle(
-                                fontFamily: 'Exo',
-                                fontSize: 16,
-                                color: Colors.black,
-                                fontWeight: FontWeight.w200,
-                              ),
-                            ),
-                          ),
-                          Text(' - '),
-                          TextButton(
-                            onPressed: () =>
-                                controller.seleccionarHora(context, i, false),
-                            child: Text(
-                              controller
-                                  .formatearHora(controller.horarios[i]['fin']),
-                              style: const TextStyle(
-                                fontFamily: 'Exo',
-                                fontSize: 16,
-                                color: Colors.black,
-                                fontWeight: FontWeight.w200,
-                              ),
-                            ),
-                          )
-                        ],
-                      );
-                    }),
                     Divider(color: Colors.cyanAccent, thickness: 1.5),
                     const SizedBox(height: 12),
                     Column(
@@ -930,6 +931,61 @@ class _NuevoLocalViewState extends State<NuevoLocalView> {
           }).toList(),
         )
       ],
+    );
+  }
+
+  //widget para seleccionar la hora
+  Future<void> _seleccionarHora(
+      BuildContext context, int index, bool esInicio) async {
+    final TimeOfDay? seleccionada = await showTimePicker(
+      context: context,
+      initialTime: TimeOfDay.now(),
+    );
+    if (seleccionada != null) {
+      setState(() {
+        if (esInicio) {
+          controller.horarios[index]['inicio'] = seleccionada;
+        } else {
+          controller.horarios[index]['fin'] = seleccionada;
+        }
+      });
+    }
+  }
+}
+
+//clase especial para el diseño del horario
+class _HoraCaja extends StatelessWidget {
+  final String hora;
+  final VoidCallback onTap;
+
+  const _HoraCaja({required this.hora, required this.onTap});
+
+  @override
+  Widget build(BuildContext context) {
+    return InkWell(
+      onTap: onTap,
+      child: Container(
+        width: 70,
+        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
+        decoration: BoxDecoration(
+          color: Colors.grey.shade300,
+          borderRadius: BorderRadius.circular(6),
+        ),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Text(
+              hora,
+              style: const TextStyle(
+                fontFamily: 'Exo',
+                fontSize: 14,
+                color: Colors.black87,
+              ),
+            ),
+            const Icon(Icons.access_time, size: 16, color: Colors.black54),
+          ],
+        ),
+      ),
     );
   }
 }
