@@ -10,7 +10,16 @@ class ContactsView extends StatefulWidget {
 class _ContactsViewState extends State<ContactsView> {
   @override
   Widget build(BuildContext context) {
-    // TODO: implement build
-    throw UnimplementedError();
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Contactos'),
+      ),
+      body: const Center(
+        child: Text(
+          'Aquí irá el contenido de contactos',
+          style: TextStyle(fontSize: 18),
+        ),
+      ),
+    );
   }
 }

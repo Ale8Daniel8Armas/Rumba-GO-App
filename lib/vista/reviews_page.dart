@@ -10,7 +10,16 @@ class ReviewView extends StatefulWidget {
 class _ReviewViewState extends State<ReviewView> {
   @override
   Widget build(BuildContext context) {
-    // TODO: implement build
-    throw UnimplementedError();
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Contactos'),
+      ),
+      body: const Center(
+        child: Text(
+          'Aquí irá el contenido de reseñas',
+          style: TextStyle(fontSize: 18),
+        ),
+      ),
+    );
   }
 }
