@@ -5,6 +5,9 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:geolocator/geolocator.dart';
+import 'dart:typed_data'; // Para Uint8List
+import 'package:flutter/foundation.dart'; // Para kIsWeb
+import 'package:image_picker/image_picker.dart'; // Para XFile
 
 class NuevoLocalController {
   // Controladores de texto
@@ -37,18 +40,74 @@ class NuevoLocalController {
 
   // Zonas
   final List<String> zonasQuito = [
-    'La Mariscal',
-    'Centro Histórico',
-    'La Floresta',
-    'La Carolina',
-    'El Condado',
-    'Cumbayá',
-    'Tumbaco',
-    'La Magdalena',
+    'Ninguno',
+    'Amaguaña',
+    'Belisario Quevedo',
+    'Calacalí',
+    'Calderón',
     'Carcelén',
+    'Centro Histórico',
+    'Checa',
+    'Chilibulo',
+    'Chillogallo',
+    'Chimbacalle',
+    'Cochapamba',
+    'Comité del Pueblo',
+    'Concepción',
+    'Conocoto',
+    'Cotocollao',
+    'Cumbayá',
+    'El Batán',
+    'El Condado',
+    'El Inca',
+    'El Labrador',
+    'El Tejar',
+    'Eloy Alfaro',
+    'Guamaní',
+    'Guayllabamba',
+    'Iñaquito',
+    'Itchimbía',
+    'Jipijapa',
+    'Kennedy',
+    'La Argelia',
+    'La Ecuatoriana',
+    'La Ferroviaria',
+    'La Floresta',
+    'La Libertad',
+    'La Magdalena',
+    'La Mariscal',
+    'La Mena',
+    'La Merced',
+    'La Tola',
+    'Llano Chico',
+    'Lloa',
+    'Nayón',
+    'Nono',
+    'Pifo',
+    'Pintag',
+    'Pomasqui',
+    'Ponceano',
+    'Puéllaro',
+    'Puembo',
+    'Puengasí',
     'Quitumbe',
+    'Rumipamba',
+    'San Antonio de Pichincha',
+    'San Isidro del Inca',
+    'San Juan',
+    'San Rafael (Capelo)',
+    'San Sebastián',
+    'Santa Prisca',
+    'Sangolquí',
+    'Solanda',
+    'Tababela',
+    'Turubamba',
+    'Tumbaco',
+    'Villaflora',
+    'Yaruqui',
+    'Zambiza',
   ];
-  String zonaSeleccionada = 'La Mariscal';
+  String zonaSeleccionada = 'Ninguno';
 
   // Teléfonos
   List<TextEditingController> telefonosControllers = [TextEditingController()];
@@ -65,8 +124,12 @@ class NuevoLocalController {
   final List<Map<String, dynamic>> musicOptions = [
     {'label': 'Rock', 'selected': false},
     {'label': 'Pop', 'selected': false},
+    {'label': 'Música Nacional', 'selected': false},
+    {'label': 'Salsa', 'selected': false},
     {'label': 'Electrónica', 'selected': false},
     {'label': 'Jazz', 'selected': false},
+    {'label': 'Cumbia', 'selected': false},
+    {'label': 'Caribe', 'selected': false},
     {'label': 'Clásica', 'selected': false},
     {'label': 'Reggaetón', 'selected': false},
     {'label': 'Rap', 'selected': false},
@@ -84,6 +147,8 @@ class NuevoLocalController {
   final List<Map<String, dynamic>> drinksOptions = [
     {'label': 'Cerveza', 'selected': false},
     {'label': 'Cócteles', 'selected': false},
+    {'label': 'Whisky', 'selected': false},
+    {'label': 'Tequila', 'selected': false},
     {'label': 'Vino', 'selected': false},
     {'label': 'Café', 'selected': false},
     {'label': 'Sin alcohol', 'selected': false},
@@ -150,14 +215,11 @@ class NuevoLocalController {
     bool servicioHabilitado;
     LocationPermission permiso;
 
-    // Verifica si el GPS está habilitado
     servicioHabilitado = await Geolocator.isLocationServiceEnabled();
     if (!servicioHabilitado) {
-      // Puedes mostrar un diálogo o mensaje aquí
       return;
     }
 
-    // Revisa permisos
     permiso = await Geolocator.checkPermission();
     if (permiso == LocationPermission.denied) {
       permiso = await Geolocator.requestPermission();
@@ -167,11 +229,9 @@ class NuevoLocalController {
     }
 
     if (permiso == LocationPermission.deniedForever) {
-      // Permiso denegado permanentemente
       return;
     }
 
-    // Todo OK, obtén ubicación
     Position position = await Geolocator.getCurrentPosition(
         desiredAccuracy: LocationAccuracy.high);
 
@@ -180,15 +240,73 @@ class NuevoLocalController {
   }
 
   // Fotos y logo
-  List<File> fotosLocal = [];
-  File? logoFile;
+  List<XFile> fotosLocal = [];
+  XFile? logoFile;
 
-  // Subir imagen a Firebase y obtener URL
-  Future<String> subirImagen(File archivo, String nombreArchivo) async {
-    final ref =
-        FirebaseStorage.instance.ref().child('locales/$nombreArchivo.jpg');
-    await ref.putFile(archivo);
-    return await ref.getDownloadURL();
+// Subir imagen a Firebase y obtener URL
+  Future<String> subirImagen(XFile imagen, String nombreArchivo) async {
+    try {
+      final bytes = await imagen.readAsBytes();
+
+      String mimeType = 'image/jpeg';
+      String extension = 'jpg';
+
+      if (imagen.name.toLowerCase().endsWith('.png')) {
+        mimeType = 'image/png';
+        extension = 'png';
+      } else if (imagen.name.toLowerCase().endsWith('.jpeg') ||
+          imagen.name.toLowerCase().endsWith('.jpg')) {
+        mimeType = 'image/jpeg';
+        extension = 'jpg';
+      }
+
+      final ref = FirebaseStorage.instance
+          .ref()
+          .child('locales')
+          .child('$nombreArchivo.$extension');
+
+      final metadata = SettableMetadata(
+        contentType: mimeType,
+        customMetadata: {
+          'original_name': imagen.name,
+          'uploaded_by': FirebaseAuth.instance.currentUser?.uid ?? '',
+          'upload_date': DateTime.now().toIso8601String(),
+        },
+      );
+
+      final uploadTask = ref.putData(bytes, metadata);
+
+      final taskSnapshot = await uploadTask
+          .whenComplete(() {})
+          .timeout(const Duration(seconds: 45), onTimeout: () {
+        throw Exception('Tiempo de espera excedido al subir la imagen');
+      });
+
+      return await taskSnapshot.ref.getDownloadURL();
+    } catch (e) {
+      throw Exception('Error al subir imagen: ${e.toString()}');
+    }
+  }
+
+//validadores auxiliares para carga de imagen
+  Future<Uint8List> _getBytesFromImagen(dynamic imagen) async {
+    if (imagen is XFile) {
+      return await imagen.readAsBytes();
+    } else if (imagen is Uint8List) {
+      return imagen;
+    } else {
+      throw Exception('Tipo de imagen no soportado para web');
+    }
+  }
+
+  Future<File> _getFileFromImagen(dynamic imagen) async {
+    if (imagen is XFile) {
+      return File(imagen.path);
+    } else if (imagen is File) {
+      return imagen;
+    } else {
+      throw Exception('Tipo de imagen no soportado para móvil/desktop');
+    }
   }
 
   Future<LocalModel> construirModelo() async {
@@ -200,16 +318,19 @@ class NuevoLocalController {
       ...categoriasAmbiente,
       ...categoriasBebidas,
     ];
-    final servicios = obtenerEtiquetasSeleccionadas(serviciosDisponibles);
-    final fotosUrls = await Future.wait(fotosLocal.asMap().entries.map((e) {
-      return subirImagen(
-          e.value, 'foto_${DateTime.now().millisecondsSinceEpoch}_${e.key}');
-    }));
 
-    final logoUrl = logoFile != null
-        ? await subirImagen(
-            logoFile!, 'logo_${DateTime.now().millisecondsSinceEpoch}')
-        : '';
+    final servicios = obtenerEtiquetasSeleccionadas(serviciosDisponibles);
+
+    // Subir imágenes y obtener URLs
+    String? logoUrl;
+    if (logoFile != null) {
+      logoUrl = await subirImagen(
+          logoFile!, 'logo_${DateTime.now().millisecondsSinceEpoch}');
+    }
+
+    final fotosUrls = await Future.wait(fotosLocal.asMap().entries.map((e) =>
+        subirImagen(e.value,
+            'foto_${DateTime.now().millisecondsSinceEpoch}_${e.key}')));
 
     return LocalModel(
       nombre: nombreController.text,
@@ -240,7 +361,7 @@ class NuevoLocalController {
       tiktok: tiktokController.text,
       paginaWeb: paginaWebController.text,
       fotosUrls: fotosUrls,
-      logoUrl: logoUrl,
+      logoUrl: logoUrl ?? '',
       servicios: servicios,
       aforoMaximo: int.tryParse(aforoMaximoController.text) ?? 0,
     );
@@ -248,17 +369,23 @@ class NuevoLocalController {
 
   // Guardar local en Firestore
   Future<void> guardarEnFirestore(LocalModel local) async {
-    final firestore = FirebaseFirestore.instance;
-    final user = FirebaseAuth.instance.currentUser;
+    try {
+      final firestore = FirebaseFirestore.instance;
+      final user = FirebaseAuth.instance.currentUser;
 
-    if (user == null) throw Exception('Usuario no autenticado');
+      if (user == null) throw Exception('Usuario no autenticado');
 
-    await firestore.collection('locales').add({
-      ...local.toMap(),
-      'idUsuario': user.uid,
-      'fechaAlta': FieldValue.serverTimestamp(),
-      'estado': 'pendiente',
-    });
+      await firestore.collection('locales').add({
+        ...local.toMap(),
+        'idUsuario': user.uid,
+        'fechaAlta': FieldValue.serverTimestamp(),
+        'estado': 'pendiente',
+        'rating': 0,
+        'reseñas': [],
+      });
+    } catch (e) {
+      throw Exception('Error al guardar en Firestore: $e');
+    }
   }
 
   //Actualizar el rol del usuario
@@ -275,9 +402,18 @@ class NuevoLocalController {
 
   // Botón final: registrar
   Future<void> publicarNuevoLocal() async {
-    final local = await construirModelo();
-    await guardarEnFirestore(local);
-    await actualizarRolUsuarioAPropietario();
+    try {
+      final errores = validarFormulario();
+      if (errores.isNotEmpty) {
+        throw Exception(errores.join('\n'));
+      }
+
+      final local = await construirModelo();
+      await guardarEnFirestore(local);
+      await actualizarRolUsuarioAPropietario();
+    } catch (e) {
+      throw Exception('Error al publicar local: $e');
+    }
   }
 
   // Hora
@@ -409,6 +545,18 @@ class NuevoLocalController {
       }
     }
 
+    /*
+    //12 Validacion de carga de imagenes
+    if (logoFile == null) {
+      errores.add('El logo del local es requerido');
+    }
+
+    if (fotosLocal.isEmpty) {
+      errores.add('Debe agregar al menos una foto del local');
+    } else if (fotosLocal.length > 10) {
+      errores.add('Máximo 10 fotos permitidas');
+    }
+    */
     return errores;
   }
 }

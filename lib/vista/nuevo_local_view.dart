@@ -2,6 +2,8 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import '../controlador/LocalController.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:flutter/foundation.dart'; // Para kIsWeb
+import 'image_helper.dart';
 
 class NuevoLocalView extends StatefulWidget {
   const NuevoLocalView({super.key});
@@ -18,7 +20,7 @@ class _NuevoLocalViewState extends State<NuevoLocalView> {
     final List<XFile>? fotos = await picker.pickMultiImage();
     if (fotos != null && fotos.isNotEmpty) {
       setState(() {
-        controller.fotosLocal.addAll(fotos.map((f) => File(f.path)));
+        controller.fotosLocal.addAll(fotos);
       });
     }
   }
@@ -28,7 +30,7 @@ class _NuevoLocalViewState extends State<NuevoLocalView> {
     final XFile? logo = await picker.pickImage(source: ImageSource.gallery);
     if (logo != null) {
       setState(() {
-        controller.logoFile = File(logo.path);
+        controller.logoFile = logo;
       });
     }
   }
@@ -74,7 +76,7 @@ class _NuevoLocalViewState extends State<NuevoLocalView> {
                         fontFamily: 'Exo',
                         fontSize: 16,
                         fontWeight: FontWeight.bold,
-                        color: Colors.black87,
+                        color: Colors.black,
                       ),
                     ),
                     const SizedBox(height: 10),
@@ -82,7 +84,7 @@ class _NuevoLocalViewState extends State<NuevoLocalView> {
                       controller: controller.nombreController,
                       decoration: InputDecoration(
                         labelStyle: TextStyle(
-                          color: Colors.black87,
+                          color: Colors.lightBlue,
                           fontFamily: 'Exo',
                           fontSize: 16,
                           fontWeight: FontWeight.w200,
@@ -116,7 +118,7 @@ class _NuevoLocalViewState extends State<NuevoLocalView> {
                             fontFamily: 'Exo',
                             fontSize: 16,
                             fontWeight: FontWeight.bold,
-                            color: Colors.black87,
+                            color: Colors.black,
                           ),
                         ),
                         const SizedBox(height: 10),
@@ -132,7 +134,7 @@ class _NuevoLocalViewState extends State<NuevoLocalView> {
                               () => controller.tipoLocalSeleccionado = value!),
                           decoration: InputDecoration(
                             labelStyle: TextStyle(
-                              color: Colors.black87,
+                              color: Colors.lightBlue,
                               fontFamily: 'Exo',
                               fontSize: 16,
                               fontWeight: FontWeight.w200,
@@ -168,7 +170,7 @@ class _NuevoLocalViewState extends State<NuevoLocalView> {
                             fontFamily: 'Exo',
                             fontSize: 16,
                             fontWeight: FontWeight.bold,
-                            color: Colors.black87,
+                            color: Colors.black,
                           ),
                         ),
                         const SizedBox(height: 10),
@@ -193,7 +195,7 @@ class _NuevoLocalViewState extends State<NuevoLocalView> {
                             fontFamily: 'Exo',
                             fontSize: 16,
                             fontWeight: FontWeight.bold,
-                            color: Colors.black87,
+                            color: Colors.black,
                           ),
                         ),
                         const SizedBox(height: 10),
@@ -231,7 +233,7 @@ class _NuevoLocalViewState extends State<NuevoLocalView> {
                             fontFamily: 'Exo',
                             fontSize: 16,
                             fontWeight: FontWeight.bold,
-                            color: Colors.black87,
+                            color: Colors.black,
                           ),
                         ),
                         const SizedBox(height: 10),
@@ -289,7 +291,7 @@ class _NuevoLocalViewState extends State<NuevoLocalView> {
                             fontFamily: 'Exo',
                             fontSize: 16,
                             fontWeight: FontWeight.bold,
-                            color: Colors.black87,
+                            color: Colors.black,
                           ),
                         ),
                         const SizedBox(height: 10),
@@ -297,7 +299,7 @@ class _NuevoLocalViewState extends State<NuevoLocalView> {
                           controller: controller.direccionController,
                           decoration: InputDecoration(
                             labelStyle: TextStyle(
-                              color: Colors.black87,
+                              color: Colors.lightBlue,
                               fontFamily: 'Exo',
                               fontSize: 16,
                               fontWeight: FontWeight.w200,
@@ -333,7 +335,7 @@ class _NuevoLocalViewState extends State<NuevoLocalView> {
                             fontFamily: 'Exo',
                             fontSize: 16,
                             fontWeight: FontWeight.bold,
-                            color: Colors.black87,
+                            color: Colors.black,
                           ),
                         ),
                         const SizedBox(height: 10),
@@ -393,7 +395,7 @@ class _NuevoLocalViewState extends State<NuevoLocalView> {
                             fontFamily: 'Exo',
                             fontSize: 16,
                             fontWeight: FontWeight.bold,
-                            color: Colors.black87,
+                            color: Colors.black,
                           ),
                         ),
                         const SizedBox(height: 10),
@@ -409,7 +411,7 @@ class _NuevoLocalViewState extends State<NuevoLocalView> {
                               () => controller.zonaSeleccionada = zona!),
                           decoration: InputDecoration(
                             labelStyle: TextStyle(
-                              color: Colors.black87,
+                              color: Colors.black,
                               fontFamily: 'Exo',
                               fontSize: 16,
                               fontWeight: FontWeight.w200,
@@ -445,7 +447,7 @@ class _NuevoLocalViewState extends State<NuevoLocalView> {
                             fontFamily: 'Exo',
                             fontSize: 16,
                             fontWeight: FontWeight.bold,
-                            color: Colors.black87,
+                            color: Colors.black,
                           ),
                         ),
                         const SizedBox(height: 10),
@@ -455,7 +457,7 @@ class _NuevoLocalViewState extends State<NuevoLocalView> {
                                 controller: c,
                                 decoration: InputDecoration(
                                   labelStyle: TextStyle(
-                                    color: Colors.black87,
+                                    color: Colors.lightBlue,
                                     fontFamily: 'Exo',
                                     fontSize: 16,
                                     fontWeight: FontWeight.w200,
@@ -500,7 +502,7 @@ class _NuevoLocalViewState extends State<NuevoLocalView> {
                             fontFamily: 'Exo',
                             fontSize: 16,
                             fontWeight: FontWeight.bold,
-                            color: Colors.black87,
+                            color: Colors.black,
                           ),
                         ),
                         const SizedBox(height: 10),
@@ -508,7 +510,7 @@ class _NuevoLocalViewState extends State<NuevoLocalView> {
                           controller: controller.correoController,
                           decoration: InputDecoration(
                             labelStyle: TextStyle(
-                              color: Colors.black87,
+                              color: Colors.lightBlue,
                               fontFamily: 'Exo',
                               fontSize: 16,
                               fontWeight: FontWeight.w200,
@@ -545,7 +547,7 @@ class _NuevoLocalViewState extends State<NuevoLocalView> {
                             fontFamily: 'Exo',
                             fontSize: 16,
                             fontWeight: FontWeight.bold,
-                            color: Colors.black87,
+                            color: Colors.black,
                           ),
                         ),
                         const SizedBox(height: 10),
@@ -570,7 +572,7 @@ class _NuevoLocalViewState extends State<NuevoLocalView> {
                             fontFamily: 'Exo',
                             fontSize: 16,
                             fontWeight: FontWeight.bold,
-                            color: Colors.black87,
+                            color: Colors.black,
                           ),
                         ),
                         const SizedBox(height: 10),
@@ -596,13 +598,7 @@ class _NuevoLocalViewState extends State<NuevoLocalView> {
                         Wrap(
                           spacing: 10,
                           children: controller.fotosLocal
-                              .map((foto) => ClipRRect(
-                                    borderRadius: BorderRadius.circular(8),
-                                    child: Image.file(foto,
-                                        width: 80,
-                                        height: 80,
-                                        fit: BoxFit.cover),
-                                  ))
+                              .map((foto) => ImageHelper.buildImageWidget(foto))
                               .toList(),
                         ),
                         const SizedBox(height: 20),
@@ -612,7 +608,7 @@ class _NuevoLocalViewState extends State<NuevoLocalView> {
                             fontFamily: 'Exo',
                             fontSize: 16,
                             fontWeight: FontWeight.bold,
-                            color: Colors.black87,
+                            color: Colors.black,
                           ),
                         ),
                         const SizedBox(height: 10),
@@ -635,16 +631,11 @@ class _NuevoLocalViewState extends State<NuevoLocalView> {
                           ),
                         ),
                         const SizedBox(height: 10),
-                        if (controller.logoFile != null)
-                          ClipRRect(
-                            borderRadius: BorderRadius.circular(12),
-                            child: Image.file(
-                              controller.logoFile!,
-                              width: 100,
-                              height: 100,
-                              fit: BoxFit.cover,
-                            ),
-                          ),
+                        ImageHelper.buildImageWidget(
+                          controller.logoFile,
+                          width: 100,
+                          height: 100,
+                        ),
                       ],
                     ),
                     Divider(color: Colors.cyanAccent, thickness: 1.5),
@@ -661,7 +652,7 @@ class _NuevoLocalViewState extends State<NuevoLocalView> {
                             fontFamily: 'Exo',
                             fontSize: 16,
                             fontWeight: FontWeight.bold,
-                            color: Colors.black87,
+                            color: Colors.black,
                           ),
                         ),
                         const SizedBox(height: 10),
@@ -669,7 +660,7 @@ class _NuevoLocalViewState extends State<NuevoLocalView> {
                           controller: controller.aforoMaximoController,
                           decoration: InputDecoration(
                             labelStyle: TextStyle(
-                              color: Colors.black87,
+                              color: Colors.lightBlue,
                               fontFamily: 'Exo',
                               fontSize: 16,
                               fontWeight: FontWeight.w200,
@@ -758,29 +749,75 @@ class _NuevoLocalViewState extends State<NuevoLocalView> {
                             onPressed: () async {
                               final errores = controller.validarFormulario();
                               setState(() {});
-
                               if (errores.isEmpty) {
-                                await controller.publicarNuevoLocal();
-                                Navigator.pop(context);
+                                try {
+                                  showDialog(
+                                    context: context,
+                                    barrierDismissible: false,
+                                    builder: (context) => const Center(
+                                      child: CircularProgressIndicator(),
+                                    ),
+                                  );
+                                  // Publicar el local
+                                  await controller.publicarNuevoLocal();
+                                  Navigator.pop(context);
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    SnackBar(
+                                      content: const Text(
+                                        'Local registrado exitosamente',
+                                        style: TextStyle(fontFamily: 'Exo'),
+                                      ),
+                                      backgroundColor: Colors.green,
+                                      behavior: SnackBarBehavior.floating,
+                                      shape: RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.circular(10),
+                                      ),
+                                      duration: const Duration(seconds: 3),
+                                    ),
+                                  );
+                                  Navigator.pop(context);
+                                } catch (e) {
+                                  Navigator.pop(context);
+                                  showDialog(
+                                    context: context,
+                                    builder: (context) => AlertDialog(
+                                      title: const Text("Error al registrar"),
+                                      content: Text(
+                                        "Ocurrió un error: ${e.toString()}",
+                                        style:
+                                            const TextStyle(color: Colors.red),
+                                      ),
+                                      actions: [
+                                        TextButton(
+                                          onPressed: () =>
+                                              Navigator.pop(context),
+                                          child: const Text("Entendido"),
+                                        )
+                                      ],
+                                    ),
+                                  );
+                                }
                               } else {
                                 showDialog(
                                   context: context,
                                   builder: (context) => AlertDialog(
-                                    title:
-                                        Text("Corrija los siguientes errores:"),
+                                    title: const Text(
+                                        "Corrija los siguientes errores:"),
                                     content: SingleChildScrollView(
                                       child: Column(
                                         children: errores
-                                            .map((e) => Text("• $e",
-                                                style: TextStyle(
-                                                    color: Colors.red)))
+                                            .map((e) => Text(
+                                                  "• $e",
+                                                  style: const TextStyle(
+                                                      color: Colors.red),
+                                                ))
                                             .toList(),
                                       ),
                                     ),
                                     actions: [
                                       TextButton(
                                         onPressed: () => Navigator.pop(context),
-                                        child: Text("Entendido"),
+                                        child: const Text("Entendido"),
                                       )
                                     ],
                                   ),
@@ -869,7 +906,7 @@ class _NuevoLocalViewState extends State<NuevoLocalView> {
         controller: controller,
         decoration: InputDecoration(
           labelStyle: TextStyle(
-            color: Colors.black87,
+            color: Colors.lightBlue,
             fontFamily: 'Exo',
             fontSize: 16,
             fontWeight: FontWeight.w200,
@@ -904,7 +941,7 @@ class _NuevoLocalViewState extends State<NuevoLocalView> {
             fontFamily: 'Exo',
             fontSize: 16,
             fontWeight: FontWeight.bold,
-            color: Colors.black87,
+            color: Colors.black,
           ),
         ),
         const SizedBox(height: 10),
@@ -979,10 +1016,10 @@ class _HoraCaja extends StatelessWidget {
               style: const TextStyle(
                 fontFamily: 'Exo',
                 fontSize: 14,
-                color: Colors.black87,
+                color: Colors.black,
               ),
             ),
-            const Icon(Icons.access_time, size: 16, color: Colors.black54),
+            const Icon(Icons.access_time, size: 16, color: Colors.black),
           ],
         ),
       ),

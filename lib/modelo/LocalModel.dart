@@ -1,35 +1,36 @@
 class LocalModel {
+  //String id;
   String nombre;
-  String tipoLocal; // Ej: 'Bar', 'Discoteca', 'Karaoke'
+  String tipoLocal;
   String descripcion;
   String direccion;
   double latitud;
   double longitud;
-  String zona; // Ej: 'Zona Rosa', 'Centro Histórico'
+  String zona;
 
-  List<String> categoriasMusicales; // seleccionadas desde _musicOptions
-  List<String> categoriasAmbiente; // seleccionadas desde _ambienceOptions
-  List<String> categoriasBebidas; // seleccionadas desde _drinksOptions
-  List<String> categorias; //Lista de categorias unificada
+  List<String> categoriasMusicales;
+  List<String> categoriasAmbiente;
+  List<String> categoriasBebidas;
+  List<String> categorias;
 
-  List<Map<String, String>>
-      horarios; // Ej: [{'día': 'Lunes', 'inicio': '18:00', 'fin': '02:00'}]
+  List<Map<String, String>> horarios;
 
-  List<String> telefonos; // Puede haber más de uno
+  List<String> telefonos;
   String correo;
   String facebook;
   String instagram;
   String tiktok;
   String paginaWeb;
 
-  List<String> fotosUrls; // Almacenadas en Firebase Storage (paths)
-  String logoUrl; // Almacenado también en Storage
+  List<String> fotosUrls;
+  String logoUrl;
 
-  List<String> servicios; // Ej: ['DJ en vivo', 'Terraza', 'WiFi', ...]
+  List<String> servicios;
   int aforoMaximo;
 
   // Constructor
   LocalModel({
+    //required this.id,
     required this.nombre,
     required this.tipoLocal,
     required this.descripcion,
@@ -83,20 +84,23 @@ class LocalModel {
   }
 
   // Constructor desde Map (para recuperar desde Firestore)
- factory LocalModel.fromMap(Map<String, dynamic> map) {
+  factory LocalModel.fromMap(Map<String, dynamic> map) {
     return LocalModel(
       nombre: map['nombre'] ?? '',
       tipoLocal: map['tipoLocal'] ?? '',
       descripcion: map['descripcion'] ?? '',
       direccion: map['direccion'] ?? '',
-      latitud: map['latitud'] ?? 0.0,
-      longitud: map['longitud'] ?? 0.0,
+      latitud: (map['latitud'] as num?)?.toDouble() ?? 0.0,
+      longitud: (map['longitud'] as num?)?.toDouble() ?? 0.0,
       zona: map['zona'] ?? '',
       categoriasMusicales: List<String>.from(map['categoriasMusicales'] ?? []),
       categoriasAmbiente: List<String>.from(map['categoriasAmbiente'] ?? []),
       categoriasBebidas: List<String>.from(map['categoriasBebidas'] ?? []),
       categorias: List<String>.from(map['categorias'] ?? []),
-      horarios: List<Map<String, String>>.from(map['horarios'] ?? []),
+      horarios: (map['horarios'] as List<dynamic>?)
+              ?.map((h) => Map<String, String>.from(h as Map))
+              .toList() ??
+          [],
       telefonos: List<String>.from(map['telefonos'] ?? []),
       correo: map['correo'] ?? '',
       facebook: map['facebook'] ?? '',
@@ -106,7 +110,7 @@ class LocalModel {
       fotosUrls: List<String>.from(map['fotosUrls'] ?? []),
       logoUrl: map['logoUrl'] ?? '',
       servicios: List<String>.from(map['servicios'] ?? []),
-      aforoMaximo: map['aforoMaximo'] ?? 0,
+      aforoMaximo: (map['aforoMaximo'] as num?)?.toInt() ?? 0,
     );
   }
 }

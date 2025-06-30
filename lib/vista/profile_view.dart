@@ -178,7 +178,7 @@ class _PerfilViewState extends State<PerfilView> {
                 imageUrl.isNotEmpty ? NetworkImage(imageUrl) : null,
             child: imageUrl.isEmpty
                 ? const Icon(Icons.camera_alt_outlined,
-                    size: 40, color: Colors.black54)
+                    size: 40, color: Colors.black)
                 : null,
           );
         },
@@ -221,9 +221,9 @@ class _PerfilViewState extends State<PerfilView> {
                 '$descripcion',
                 style: const TextStyle(
                   fontFamily: 'Exo',
-                  fontSize: 16,
-                  color: Colors.black54,
-                  fontWeight: FontWeight.w200,
+                  fontSize: 14,
+                  color: Colors.black,
+                  fontWeight: FontWeight.w400,
                 ),
               ),
               const SizedBox(height: 4),
@@ -237,8 +237,8 @@ class _PerfilViewState extends State<PerfilView> {
                         style: TextStyle(
                           fontFamily: 'Exo',
                           fontSize: 14,
-                          color: Colors.black87,
-                          fontWeight: FontWeight.w200,
+                          color: Colors.black,
+                          fontWeight: FontWeight.w400,
                         )),
                   ),
                 if ((instagram ?? '').isNotEmpty)
@@ -248,8 +248,8 @@ class _PerfilViewState extends State<PerfilView> {
                         style: TextStyle(
                           fontFamily: 'Exo',
                           fontSize: 14,
-                          color: Colors.black87,
-                          fontWeight: FontWeight.w200,
+                          color: Colors.black,
+                          fontWeight: FontWeight.w400,
                         )),
                   ),
                 if ((twitter ?? '').isNotEmpty)
@@ -259,8 +259,8 @@ class _PerfilViewState extends State<PerfilView> {
                         style: TextStyle(
                           fontFamily: 'Exo',
                           fontSize: 14,
-                          color: Colors.black87,
-                          fontWeight: FontWeight.w200,
+                          color: Colors.black,
+                          fontWeight: FontWeight.w400,
                         )),
                   ),
               ],

@@ -91,7 +91,7 @@ class _PerfilEditableViewState extends State<PerfilEditableView> {
     const TextStyle fieldTextStyle = TextStyle(
       fontFamily: 'Exo',
       fontSize: 16,
-      fontWeight: FontWeight.w200,
+      fontWeight: FontWeight.w500,
       color: Colors.black,
     );
 
@@ -151,7 +151,7 @@ class _PerfilEditableViewState extends State<PerfilEditableView> {
     const TextStyle fieldTextStyle = TextStyle(
       fontFamily: 'Exo',
       fontSize: 16,
-      fontWeight: FontWeight.w200,
+      fontWeight: FontWeight.w500,
       color: Colors.black,
     );
     return Padding(
@@ -213,7 +213,7 @@ class _PerfilEditableViewState extends State<PerfilEditableView> {
     const TextStyle fieldTextStyle = TextStyle(
       fontFamily: 'Exo',
       fontSize: 16,
-      fontWeight: FontWeight.w200,
+      fontWeight: FontWeight.w500,
       color: Colors.black,
     );
     return Padding(
