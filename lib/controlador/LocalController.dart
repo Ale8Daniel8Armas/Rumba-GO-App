@@ -243,48 +243,137 @@ class NuevoLocalController {
   List<XFile> fotosLocal = [];
   XFile? logoFile;
 
-// Subir imagen a Firebase y obtener URL
-  Future<String> subirImagen(XFile imagen, String nombreArchivo) async {
+  // Eliminar imagen de Firebase Storage
+  Future<void> eliminarImagen(String path) async {
     try {
-      final bytes = await imagen.readAsBytes();
+      final ref = FirebaseStorage.instance.ref().child(path);
+      await ref.delete();
+    } catch (e) {
+      throw Exception('Error al eliminar imagen: ${e.toString()}');
+    }
+  }
 
-      String mimeType = 'image/jpeg';
-      String extension = 'jpg';
-
-      if (imagen.name.toLowerCase().endsWith('.png')) {
-        mimeType = 'image/png';
-        extension = 'png';
-      } else if (imagen.name.toLowerCase().endsWith('.jpeg') ||
-          imagen.name.toLowerCase().endsWith('.jpg')) {
-        mimeType = 'image/jpeg';
-        extension = 'jpg';
+// Subir imagen a Firebase y obtener URL (con actualización)
+  Future<String> subirImagen(XFile imagen, String nombreArchivo,
+      {String? oldImagePath}) async {
+    try {
+      // Validación de entrada
+      if (imagen.path.isEmpty) {
+        throw Exception('El archivo de imagen no es válido');
       }
 
+      // Si se pasa una ruta antigua, eliminamos la imagen existente
+      if (oldImagePath != null && oldImagePath.isNotEmpty) {
+        await eliminarImagen(oldImagePath);
+      }
+
+      // Limpiamos el nombre del archivo de caracteres especiales
+      String nombreLimpio = nombreArchivo.replaceAll(RegExp(r'[^\w\-.]'), '_');
+      String extension = imagen.path.split('.').last.toLowerCase();
+
+      // Validamos la extensión
+      if (!['jpg', 'jpeg', 'png'].contains(extension)) {
+        throw Exception('Formato de imagen no soportado (.jpg, .jpeg, .png)');
+      }
+
+      // Creamos la referencia con el nombre limpio
       final ref = FirebaseStorage.instance
           .ref()
           .child('locales')
-          .child('$nombreArchivo.$extension');
+          .child('$nombreLimpio.$extension');
 
+      // Configuración de metadatos mejorada
       final metadata = SettableMetadata(
-        contentType: mimeType,
+        contentType: 'image/$extension',
         customMetadata: {
           'original_name': imagen.name,
-          'uploaded_by': FirebaseAuth.instance.currentUser?.uid ?? '',
+          'uploaded_by': FirebaseAuth.instance.currentUser?.uid ?? 'anon',
           'upload_date': DateTime.now().toIso8601String(),
+          'size': (await imagen.length()).toString(),
         },
       );
 
-      final uploadTask = ref.putData(bytes, metadata);
+      // Subimos el archivo directamente desde su path (más eficiente que cargar bytes)
+      final uploadTask = ref.putFile(File(imagen.path), metadata);
 
+      // Manejamos el progreso y timeout
       final taskSnapshot = await uploadTask
           .whenComplete(() {})
-          .timeout(const Duration(seconds: 45), onTimeout: () {
+          .timeout(const Duration(seconds: 60), onTimeout: () {
         throw Exception('Tiempo de espera excedido al subir la imagen');
       });
 
-      return await taskSnapshot.ref.getDownloadURL();
+      // Obtenemos la URL de descarga persistente
+      String downloadUrl = await taskSnapshot.ref.getDownloadURL();
+      print('Imagen subida correctamente: $downloadUrl');
+
+      return downloadUrl;
     } catch (e) {
+      print('Error en subirImagen: ${e.toString()}');
       throw Exception('Error al subir imagen: ${e.toString()}');
+    }
+  }
+
+// Función mejorada para subir el logo
+  Future<String?> subirLogoConActualizacion(String localId,
+      {String? oldLogoPath}) async {
+    if (logoFile == null) return null;
+
+    try {
+      // Generamos un nombre de archivo único pero consistente
+      String nombreArchivo =
+          'logo_${localId}_${DateTime.now().millisecondsSinceEpoch}';
+
+      return await subirImagen(
+        logoFile!,
+        'locales/$localId/logo/$nombreArchivo',
+        oldImagePath: oldLogoPath,
+      );
+    } catch (e) {
+      print('Error en subirLogoConActualizacion: ${e.toString()}');
+      throw Exception('Error al subir logo: ${e.toString()}');
+    }
+  }
+
+// Función mejorada para subir las fotos
+  Future<List<String>> subirFotosConActualizacion(String localId,
+      {List<String>? oldFotoPaths}) async {
+    List<String> fotosUrls = [];
+
+    if (fotosLocal.isEmpty) {
+      return fotosUrls;
+    }
+
+    try {
+      for (int i = 0; i < fotosLocal.length; i++) {
+        try {
+          String oldPath = oldFotoPaths != null && i < oldFotoPaths.length
+              ? oldFotoPaths[i]
+              : '';
+
+          String nombreArchivo =
+              'foto_${i}_${DateTime.now().millisecondsSinceEpoch}';
+
+          String fotoUrl = await subirImagen(
+            fotosLocal[i],
+            'locales/$localId/fotos/$nombreArchivo',
+            oldImagePath: oldPath.isNotEmpty ? oldPath : null,
+          );
+
+          fotosUrls.add(fotoUrl);
+        } catch (e) {
+          print('Error subiendo foto $i: ${e.toString()}');
+        }
+      }
+
+      if (fotosUrls.isEmpty && fotosLocal.isNotEmpty) {
+        throw Exception('No se pudo subir ninguna foto');
+      }
+
+      return fotosUrls;
+    } catch (e) {
+      print('Error en subirFotosConActualizacion: ${e.toString()}');
+      throw Exception('Error al subir fotos: ${e.toString()}');
     }
   }
 
@@ -309,7 +398,10 @@ class NuevoLocalController {
     }
   }
 
-  Future<LocalModel> construirModelo() async {
+  Future<LocalModel> construirModelo({
+    List<String>? oldFotoPaths,
+    String? oldLogoPath,
+  }) async {
     final categoriasMusicales = obtenerEtiquetasSeleccionadas(musicOptions);
     final categoriasAmbiente = obtenerEtiquetasSeleccionadas(ambienceOptions);
     final categoriasBebidas = obtenerEtiquetasSeleccionadas(drinksOptions);
@@ -321,16 +413,18 @@ class NuevoLocalController {
 
     final servicios = obtenerEtiquetasSeleccionadas(serviciosDisponibles);
 
-    // Subir imágenes y obtener URLs
     String? logoUrl;
     if (logoFile != null) {
-      logoUrl = await subirImagen(
-          logoFile!, 'logo_${DateTime.now().millisecondsSinceEpoch}');
+      logoUrl = await subirLogoConActualizacion(
+        'localId',
+        oldLogoPath: oldLogoPath,
+      );
     }
 
-    final fotosUrls = await Future.wait(fotosLocal.asMap().entries.map((e) =>
-        subirImagen(e.value,
-            'foto_${DateTime.now().millisecondsSinceEpoch}_${e.key}')));
+    List<String> fotosUrls = await subirFotosConActualizacion(
+      'localId',
+      oldFotoPaths: oldFotoPaths,
+    );
 
     return LocalModel(
       nombre: nombreController.text,
@@ -400,14 +494,12 @@ class NuevoLocalController {
     await clienteRef.update({'rol': 'propietario'});
   }
 
-  // Botón final: registrar
   Future<void> publicarNuevoLocal() async {
     try {
       final errores = validarFormulario();
       if (errores.isNotEmpty) {
         throw Exception(errores.join('\n'));
       }
-
       final local = await construirModelo();
       await guardarEnFirestore(local);
       await actualizarRolUsuarioAPropietario();
@@ -440,7 +532,7 @@ class NuevoLocalController {
     }
 
     // 2) Validación tipo de local
-    if (tipoLocalSeleccionado == null || tipoLocalSeleccionado!.isEmpty) {
+    if (tipoLocalSeleccionado.isEmpty) {
       tipoLocalError = "Seleccione un tipo de local";
       errores.add(tipoLocalError!);
     }
@@ -483,7 +575,7 @@ class NuevoLocalController {
     }
 
     // 7) Validación zona
-    if (zonaSeleccionada == null || zonaSeleccionada!.isEmpty) {
+    if (zonaSeleccionada.isEmpty) {
       zonaError = "Seleccione una zona";
       errores.add(zonaError!);
     }

@@ -6,6 +6,9 @@ import '../modelo/LocalModel.dart';
 import 'profile_view.dart';
 import 'reviews_page.dart';
 import 'contacts_page.dart';
+import 'mini_formulario.dart';
+import 'nuevo_local_view.dart';
+import 'review_form_view.dart';
 
 class MapView extends StatefulWidget {
   const MapView({super.key});
@@ -310,7 +313,23 @@ class _CustomBottomNavBar extends StatelessWidget {
                   context, MaterialPageRoute(builder: (_) => const MapView())),
             ),
             GestureDetector(
-              onTap: () {},
+              onTap: () {
+                MiniFormulario.mostrar(
+                  context: context,
+                  onResenaPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (context) => ReviewFormView()),
+                    );
+                  },
+                  onLocalPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (context) => NuevoLocalView()),
+                    );
+                  },
+                );
+              },
               child: Container(
                 width: 70,
                 height: 70,

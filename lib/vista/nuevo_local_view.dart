@@ -1,8 +1,7 @@
-import 'dart:io';
 import 'package:flutter/material.dart';
 import '../controlador/LocalController.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:flutter/foundation.dart'; // Para kIsWeb
+import 'package:flutter/foundation.dart';
 import 'image_helper.dart';
 
 class NuevoLocalView extends StatefulWidget {
@@ -758,6 +757,7 @@ class _NuevoLocalViewState extends State<NuevoLocalView> {
                                       child: CircularProgressIndicator(),
                                     ),
                                   );
+
                                   // Publicar el local
                                   await controller.publicarNuevoLocal();
                                   Navigator.pop(context);

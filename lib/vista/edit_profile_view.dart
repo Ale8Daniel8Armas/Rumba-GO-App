@@ -9,6 +9,8 @@ import 'reviews_page.dart';
 import 'contacts_page.dart';
 import 'nuevo_local_view.dart';
 import 'locales_usuario_view.dart';
+import 'mini_formulario.dart';
+import 'review_form_view.dart';
 
 class PerfilEditableView extends StatefulWidget {
   const PerfilEditableView({super.key});
@@ -597,7 +599,21 @@ class _CustomBottomNavBar extends StatelessWidget {
             ),
             GestureDetector(
               onTap: () {
-                // Acción del botón aquí
+                MiniFormulario.mostrar(
+                  context: context,
+                  onResenaPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (context) => ReviewFormView()),
+                    );
+                  },
+                  onLocalPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (context) => NuevoLocalView()),
+                    );
+                  },
+                );
               },
               child: Container(
                 width: 70,

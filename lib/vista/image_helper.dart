@@ -1,4 +1,6 @@
 import 'dart:typed_data';
+import 'dart:io';
+import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 
@@ -33,5 +35,32 @@ class ImageHelper {
         );
       },
     );
+  }
+
+// Función para subir imágenes a Firebase Storage (con sobreescritura)
+  static Future<String> uploadImageToFirebase(XFile image, String path) async {
+    Uint8List imageBytes = await getBytes(image);
+
+    Reference storageReference = FirebaseStorage.instance.ref().child(path);
+
+    UploadTask uploadTask = storageReference.putData(imageBytes);
+
+    TaskSnapshot snapshot = await uploadTask;
+
+    String downloadUrl = await snapshot.ref.getDownloadURL();
+
+    return downloadUrl;
+  }
+
+  // Función para eliminar una imagen existente en Firebase Storage
+  static Future<void> deleteImageFromFirebase(String path) async {
+    Reference storageReference = FirebaseStorage.instance.ref().child(path);
+    await storageReference.delete();
+  }
+
+  // Función para actualizar una imagen: primero eliminamos la vieja y luego subimos la nueva
+  static Future<String> updateImage(XFile newImage, String path) async {
+    await deleteImageFromFirebase(path);
+    return await uploadImageToFirebase(newImage, path);
   }
 }
