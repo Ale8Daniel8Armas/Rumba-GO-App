@@ -475,19 +475,19 @@ class _PerfilEditableViewState extends State<PerfilEditableView> {
                           );
                         },
                         icon: const Icon(Icons.local_mall_rounded,
-                            color: Colors.white),
+                            color: Color.fromARGB(255, 109, 175, 230)),
                         label: const Text(
                           'Gestiona tus locales',
                           style: TextStyle(
                             fontFamily: 'Exo',
                             fontSize: 16,
                             fontWeight: FontWeight.w500,
-                            color: Colors.white,
+                            color: Color.fromARGB(255, 2, 230, 247),
                           ),
                         ),
                         style: ElevatedButton.styleFrom(
                           backgroundColor: Colors.transparent,
-                          shadowColor: Colors.white,
+                          shadowColor: const Color.fromARGB(255, 54, 52, 52),
                           padding: const EdgeInsets.symmetric(
                               vertical: 16, horizontal: 24),
                           shape: RoundedRectangleBorder(
